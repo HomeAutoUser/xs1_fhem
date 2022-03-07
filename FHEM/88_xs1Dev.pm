@@ -24,7 +24,7 @@ use Time::Local;
 sub xs1Dev_Initialize {
   my ($hash) = @_;
 
-  $hash->{Match}      = "[x][s][1][D][e][v][_][A][k][t][o][r]_[0-6][0-9].*|[x][s][1][D][e][v][_][S][e][n][s][o][r]_[0-6][0-9].*";       ## zum testen - https://regex101.com/
+  $hash->{Match}      = "[x][s][1][D][e][v][#][A][k][t][o][r]#[0-6][0-9].*|[x][s][1][D][e][v][#][S][e][n][s][o][r]#[0-6][0-9].*";       ## zum testen - https://regex101.com/
   $hash->{DefFn}      = "xs1Dev_Define";
   $hash->{AttrFn}     = "xs1Dev_Attr";
   $hash->{ParseFn}    = "xs1Dev_Parse";
@@ -255,7 +255,7 @@ sub xs1Dev_Set {
 
 
 ########################
-sub xs1Dev_Parse {          ## Input Data from 88_xs1Bridge
+sub xs1Dev_Parse {              ## Input Data from 88_xs1Bridge
   my ( $io_hash, $data) = @_;   ## $io_hash = ezControl -> def. Name von xs1Bridge
 
   my ($xs1Dev,$xs1_readingsname,$xs1_ID,$xs1_typ2,$xs1_value,$xs1_f1,$xs1_f2,$xs1_f3,$xs1_f4,$xs1_name) = split("#", $data);
@@ -271,7 +271,7 @@ sub xs1Dev_Parse {          ## Input Data from 88_xs1Bridge
 
   my $name = $hash->{NAME};     ## xs1Dev_Aktor_01
   my $typ = $hash->{TYPE};      ## xs1Dev
-  $typ = "xs1Dev" if (!$def);     ## Erstanlegung
+  $typ = "xs1Dev" if (!$def);   ## Erstanlegung
 
   ###### Define and values update ######
   #Log3 $typ, 3, "$typ: Parse | Data: $xs1Dev | $xs1_readingsname | $xs1_ID | $xs1_typ2 | $xs1_value | $xs1_typ1" if (!$def);
@@ -284,7 +284,7 @@ sub xs1Dev_Parse {          ## Input Data from 88_xs1Bridge
   } else {
     #Log3 $name, 3, "$typ: device $xs1_readingsname"."_"."$xs1_ID xs1_value:$xs1_value xs1_typ2:$xs1_typ2";
 
-    AssignIoPort($hash, $io_hash);      ## sucht nach einem passenden IO-Gerät (physikalische Definition)
+    AssignIoPort($hash, $io_hash);        ## sucht nach einem passenden IO-Gerät (physikalische Definition)
 
     if ($xs1_readingsname eq "Aktor") {   ## zugeordnete xs1_Funktionen
       $hash->{xs1_function1} = $xs1_f1;
