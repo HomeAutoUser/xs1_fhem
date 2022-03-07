@@ -24,17 +24,17 @@ use Time::Local;
 sub xs1Dev_Initialize {
   my ($hash) = @_;
 
-  $hash->{Match}      = "[x][s][1][D][e][v][#][A][k][t][o][r]#[0-6][0-9].*|[x][s][1][D][e][v][#][S][e][n][s][o][r]#[0-6][0-9].*";       ## zum testen - https://regex101.com/
-  $hash->{DefFn}      = "xs1Dev_Define";
-  $hash->{AttrFn}     = "xs1Dev_Attr";
-  $hash->{ParseFn}    = "xs1Dev_Parse";
-  $hash->{SetFn}      = "xs1Dev_Set";
-  $hash->{UndefFn}    = "xs1Dev_Undef";
-  $hash->{AttrList}   = "debug:0,1 ".
-                        "IODev ".
-                        "ignore:0,1 ".
-                        "useSetExtensions:0,1 ".
-                        $readingFnAttributes;
+  $hash->{Match}    = "[x][s][1][D][e][v][#][A][k][t][o][r]#[0-6][0-9].*|[x][s][1][D][e][v][#][S][e][n][s][o][r]#[0-6][0-9].*";       ## zum testen - https://regex101.com/
+  $hash->{DefFn}    = "xs1Dev_Define";
+  $hash->{AttrFn}   = "xs1Dev_Attr";
+  $hash->{ParseFn}  = "xs1Dev_Parse";
+  $hash->{SetFn}    = "xs1Dev_Set";
+  $hash->{UndefFn}  = "xs1Dev_Undef";
+  $hash->{AttrList} = "debug:0,1 ".
+                      "IODev ".
+                      "ignore:0,1 ".
+                      "useSetExtensions:0,1 ".
+                      $readingFnAttributes;
 
   $hash->{AutoCreate} = { "xs1Dev_Sensor_.*" => { GPLOT => "temp4hum4:Temp/Hum,", FILTER=>"%NAME",  } };
 }
@@ -72,10 +72,10 @@ sub xs1Dev_Define {
   #Log3 $name, 3, "$typ: Define arguments 0:$arg[0] | 1:$arg[1] | 2:$arg[2] | 3:$arg[3]";
 
   # Parameter Define
-  my $xs1_ID = $arg[2];     ## Zusatzparameter 1 bei Define - ggf. nur in Sub
-  my $xs1_typ1 = $arg[1];     ## A || S
+  my $xs1_ID = $arg[2];           ## Zusatzparameter 1 bei Define - ggf. nur in Sub
+  my $xs1_typ1 = $arg[1];         ## A || S
 
-  my $Device = $xs1_typ1.$xs1_ID;           ## A02 || S05
+  my $Device = $xs1_typ1.$xs1_ID; ## A02 || S05
   my $Device_count = 0;
   my $Device_exist;
 
@@ -96,11 +96,11 @@ sub xs1Dev_Define {
   my $debug = AttrVal($hash->{NAME},"debug",0);
   AttrVal($hash->{NAME},"useSetExtensions",0);
 
-  $hash->{STATE}      = "Defined";          ## Der Status des Modules nach Initialisierung.
-  $hash->{TIME}     = time();               ## Zeitstempel, derzeit vom anlegen des Moduls
+  $hash->{STATE}  = "Defined";              ## Der Status des Modules nach Initialisierung.
+  $hash->{TIME}   = time();                 ## Zeitstempel, derzeit vom anlegen des Moduls
 
-  $hash->{xs1_name}   = "undefined";        ## Aktor | Sensor Name welcher def. im xs1
-  $hash->{xs1_typ}    = "undefined";        ## xs1_Typ switch | hygrometer | temperature ...
+  $hash->{xs1_name} = "undefined";          ## Aktor | Sensor Name welcher def. im xs1
+  $hash->{xs1_typ}  = "undefined";          ## xs1_Typ switch | hygrometer | temperature ...
 
   if ($xs1_typ1 eq "A"){
     $hash->{xs1_function1}  = "undefined";  ## xs1_Funktion zugeordnete Funktion 1
@@ -120,12 +120,6 @@ sub xs1Dev_Define {
     Log3 $name, 3, "xs1Dev: $name - no I/O Device, Please delete and restart FHEM.";
    }
 
-  #$iodev = $hash->{IODev}->{NAME};
-
-  # if(defined($hash->{IODev}->{xs1_ip})) {       ## IP von xs1Bridge - Device aus HASH
-        # $hash->{xs1_ip} = $hash->{IODev}->{xs1_ip};
-  # }
-
   return;
 }
 
@@ -137,7 +131,17 @@ sub xs1Dev_Attr {
   my $typ = $hash->{TYPE};
   my $debug = AttrVal($hash->{NAME},"debug",0);
 
-  #Debug " $name: Attr | Attributes $attrName = $attrValue" if($debug);
+  #### Handling bei set ... attribute
+  if ($cmd eq 'set' && $init_done == 1 ) {
+    Log3 $name, 4, "$name: set attribute $attrName to $attrValue";
+  }
+
+  #### Handling bei del ... attribute
+  if ($cmd eq "del") {
+    Log3 $name, 3, "$name: $cmd attribute $attrName";
+  }
+
+  return;
 }
 
 
@@ -293,11 +297,13 @@ sub xs1Dev_Parse {              ## Input Data from 88_xs1Bridge
       $hash->{xs1_function4} = $xs1_f4;
     }
 
+    readingsBeginUpdate($hash);
+
     #### Typ switch  | on | off mod for FHEM Default
     if ($xs1_typ2 eq "switch") {
       if ($xs1_value == 0) { $xs1_value = "off"; }
         elsif ($xs1_value == 100) { $xs1_value = "on"; }
-      readingsSingleUpdate($hash, "state", $xs1_value ,1);  # Aktor | Sensor Update value
+      readingsBulkUpdate($hash, "state", $xs1_value);  # Aktor | Sensor Update value
 
       ## RegEx devStateIcon da Symbole nicht gleich benannt -> dim_up | dim_down
       if ($hash->{xs1_function1} eq "dim_up" || $hash->{xs1_function2} eq "dim_up" || $hash->{xs1_function3} eq "dim_up" || $hash->{xs1_function4} eq "dim_up" || 
@@ -309,19 +315,15 @@ sub xs1Dev_Parse {              ## Input Data from 88_xs1Bridge
     } elsif ($xs1_typ2 eq "temperature") {
       my $xs1_value_new = "T: ".$xs1_value; ## temperature mod for FHEM Default
 
-      readingsBeginUpdate($hash);
       readingsBulkUpdate($hash, "state", $xs1_value_new);
       readingsBulkUpdate($hash, "temperature", $xs1_value);
-      readingsEndUpdate($hash, 1);
 
     #### Typ hygrometer
     } elsif ($xs1_typ2 eq "hygrometer") {
       my $xs1_value_new = "H: ".$xs1_value; ## hygrometer mod for FHEM Default
 
-      readingsBeginUpdate($hash);
       readingsBulkUpdate($hash, "state", $xs1_value_new);
       readingsBulkUpdate($hash, "humidity", $xs1_value);
-      readingsEndUpdate($hash, 1);
 
     #### Typ dimmer
     } elsif ($xs1_typ2 eq "dimmer") {
@@ -339,85 +341,72 @@ sub xs1Dev_Parse {              ## Input Data from 88_xs1Bridge
       $xs1_value = "off";
       }
 
-      readingsSingleUpdate($hash, "state", $xs1_value ,1);
+      readingsBulkUpdate($hash, "state", $xs1_value);
 
     #### Typ shutter | on | off mod for FHEM Default
     } elsif ($xs1_typ2 eq "shutter") {
       if ($xs1_value == 0) { $xs1_value = "off"; }
         elsif ($xs1_value == 100) { $xs1_value = "on"; }
-      readingsSingleUpdate($hash, "state", $xs1_value ,1);
+      readingsBulkUpdate($hash, "state", $xs1_value);
 
     #### Typ timerswitch | on | off mod for FHEM Default
     } elsif ($xs1_typ2 eq "timerswitch") {
       if ($xs1_value == 0) { $xs1_value = "off"; }
         elsif ($xs1_value == 100) { $xs1_value = "on"; }
-      readingsSingleUpdate($hash, "state", $xs1_value ,1);
+      readingsBulkUpdate($hash, "state", $xs1_value);
 
     } elsif ($xs1_typ2 eq "barometer") {
-      readingsBeginUpdate($hash);
-      readingsSingleUpdate($hash, "pressure", $xs1_value ,1);
-      readingsSingleUpdate($hash, "state", "P: ".$xs1_value ,1);
-      readingsEndUpdate($hash, 1);
+      readingsBulkUpdate($hash, "pressure", $xs1_value);
+      readingsBulkUpdate($hash, "state", "P: ".$xs1_value);
 
     } elsif ($xs1_typ2 eq "rain") {
-      readingsBeginUpdate($hash);
-      readingsSingleUpdate($hash, "rain", $xs1_value ,1);
-      readingsSingleUpdate($hash, "state", "R: ".$xs1_value ,1);
-      readingsEndUpdate($hash, 1);
+      readingsBulkUpdate($hash, "rain", $xs1_value);
+      readingsBulkUpdate($hash, "state", "R: ".$xs1_value);
 
     } elsif ($xs1_typ2 eq "rain_1h") {
-      readingsBeginUpdate($hash);
-      readingsSingleUpdate($hash, "rain_calc_h", $xs1_value ,1);
-      readingsSingleUpdate($hash, "state", "R: ".$xs1_value ,1);
-      readingsEndUpdate($hash, 1);
+      readingsBulkUpdate($hash, "rain_calc_h", $xs1_value);
+      readingsBulkUpdate($hash, "state", "R: ".$xs1_value);
 
     } elsif ($xs1_typ2 eq "rain_24h") {
-      readingsBeginUpdate($hash);
-      readingsSingleUpdate($hash, "rain_calc_d", $xs1_value ,1);
-      readingsSingleUpdate($hash, "state", "R: ".$xs1_value ,1);
-      readingsEndUpdate($hash, 1);
+      readingsBulkUpdate($hash, "rain_calc_d", $xs1_value);
+      readingsBulkUpdate($hash, "state", "R: ".$xs1_value);
 
     } elsif ($xs1_typ2 eq "winddirection") {
-      readingsBeginUpdate($hash);
-      readingsSingleUpdate($hash, "Winddirection", $xs1_value ,1);
-      readingsSingleUpdate($hash, "state", "D: ".$xs1_value ,1);
-      readingsEndUpdate($hash, 1);
+      readingsBulkUpdate($hash, "Winddirection", $xs1_value);
+      readingsBulkUpdate($hash, "state", "D: ".$xs1_value);
 
     } elsif ($xs1_typ2 eq "windspeed") {
-      readingsBeginUpdate($hash);
-      readingsSingleUpdate($hash, "Windspeed", $xs1_value ,1);
-      readingsSingleUpdate($hash, "state", "W: ".$xs1_value ,1);
-      readingsEndUpdate($hash, 1);
+      readingsBulkUpdate($hash, "Windspeed", $xs1_value);
+      readingsBulkUpdate($hash, "state", "W: ".$xs1_value);
 
     } elsif ($xs1_typ2 eq "counter" || $xs1_typ2 eq "counterdiff" || $xs1_typ2 eq "fencedetector" || $xs1_typ2 eq "gas_consump" || $xs1_typ2 eq "gas_peak" || 
       $xs1_typ2 eq "light" || $xs1_typ2 eq "motion" || $xs1_typ2 eq "other" || $xs1_typ2 eq "rainintensity" || $xs1_typ2 eq "remotecontrol" || 
       $xs1_typ2 eq "uv_index" || $xs1_typ2 eq "waterdetector" || $xs1_typ2 eq "waterlevel" || $xs1_typ2 eq "windgust" || $xs1_typ2 eq "windvariance" || 
       $xs1_typ2 eq "wtr_consump" || $xs1_typ2 eq "wtr_peak") {
-        readingsSingleUpdate($hash, "state", $xs1_value ,1);
+        readingsBulkUpdate($hash, "state", $xs1_value);
 
     ### Fenstermelder = windowopen | Tuermelder = dooropen --> 0 zu / 100 offen | mod for FHEM Default
     } elsif ($xs1_typ2 eq "dooropen" || $xs1_typ2 eq "windowopen") {
       if ($xs1_value == 0.0) { $xs1_value = "closed";} elsif ($xs1_value == 100.0) { $xs1_value = "Open"; }
-      readingsBeginUpdate($hash);
+
       if ($xs1_typ2 eq "windowopen") {
-          readingsSingleUpdate($hash, "Window", $xs1_value ,1);
+          readingsBulkUpdate($hash, "Window", $xs1_value);
         }
       if ($xs1_typ2 eq "dooropen") {
-          readingsSingleUpdate($hash, "Door", $xs1_value ,1);
+          readingsBulkUpdate($hash, "Door", $xs1_value);
         }
       my $value = Value($name);
       my $OldValue = OldValue($name);
       if ($value ne $OldValue) {
-        readingsSingleUpdate($hash, "Previous", $xs1_value ,0);
+        readingsBulkUpdate($hash, "Previous", $xs1_value ,0);
       }
-      readingsSingleUpdate($hash, "state", $xs1_value ,0);
-      readingsEndUpdate($hash, 1);
+      readingsBulkUpdate($hash, "state", $xs1_value);
       ### alles andere ...
     } else {
-      readingsBeginUpdate($hash);
-      readingsSingleUpdate($hash, "state", $xs1_value ,0);
-      readingsEndUpdate($hash, 1);
+      readingsBulkUpdate($hash, "state", $xs1_value);
     }
+
+    readingsEndUpdate($hash, 1);
   }
 
   return $name;
