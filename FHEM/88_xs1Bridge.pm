@@ -702,9 +702,7 @@ sub is_in_array($$$) {
   <br><br>
 
   The module was developed based on the firmware version v4-Beta of the xs1. There may be errors due to different adjustments within the manufacturer's firmware.<br>
-  Testet firmware: v4.0.0.5326 (Beta) @me | v3.0.0.4493 @ForumUser<br>
-
-  <br>
+  Testet firmware: v4.0.0.5326 (Beta) @me | v3.0.0.4493 @ForumUser<br><br>
   <ul>
     <u>Currently implemented types of xs1 for processing: </u><br>
     <li>Aktor: dimmer, switch, shutter, timerswitch</li>
@@ -714,63 +712,68 @@ sub is_in_array($$$) {
   <a name="xs1Bridge_define"></a>
   <b>Define</b><br>
     <ul>
-    xs1 without password:&nbsp;&nbsp;<code>define &lt;NAME&gt; xs1Bridge &lt;IP&gt;</code><br>
-    xs1 with password:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>define &lt;NAME&gt; xs1Bridge &lt;User&gt;:&lt;Passwort&gt;@&lt;IP&gt;</code>
-    <br><br>
+      xs1 without password:&nbsp;&nbsp;<code>define &lt;NAME&gt; xs1Bridge &lt;IP&gt;</code><br>
+      xs1 with password:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>define &lt;NAME&gt; xs1Bridge &lt;User&gt;:&lt;Passwort&gt;@&lt;IP&gt;</code>
+      <br><br>
 
-    The module can not create without the IP of the xs1. If the IP can not be reached during module definition, the Define process is aborted.
+      The module can not create without the IP of the xs1. If the IP can not be reached during module definition, the Define process is aborted.
       <ul>
         <li><code>&lt;IP&gt;</code> is IP address in the local network</li>
         <li><code>&lt;User&gt;</code> is the administrator user admin (default)</li>
         <li><code>&lt;Password&gt;</code> is the assigned administrator password in xs1</li>
       </ul><br>
-    examples:
-    <ul>
-      define EZcontrol_xs1 xs1Bridge 192.168.1.45<br>
-      define EZcontrol_xs1 xs1Bridge admin:secret@192.168.1.45<br>
-    </ul> 
+      examples:
+      <ul>
+        define EZcontrol_xs1 xs1Bridge 192.168.1.45<br>
+        define EZcontrol_xs1 xs1Bridge admin:secret@192.168.1.45<br>
+      </ul>
     </ul><br>
+
   <b>Set</b>
-  <ul>N/A</ul><br>
+    <ul>N/A</ul><br>
+
   <b>Get</b><br>
-  <ul>N/A</ul><br>
+    <ul>N/A</ul><br>
+
   <a name="xs1_attr"></a>
   <b>Attributes</b>
   <ul>
     <li>debug (0,1,2)<br>
-    This brings the module into a very detailed debug output in the logfile. Program parts can be checked and errors checked.<br>
-    (Default, debug 0)
+      This brings the module into a very detailed debug output in the logfile. Program parts can be checked and errors checked.<br>
+      (Default, debug 0)
     </li><br>
     <li>update_only_difference (0,1)<br>
-    The actuators defined in xs1 are only updated when the value changes.<br>
-    (Default, update_only_difference 0)</li><br>
+      The actuators defined in xs1 are only updated when the value changes.<br>
+      (Default, update_only_difference 0)
+    </li><br>
     <li>view_Device_name (0,1)<br>
-    The actor names defined in xs1 are read as Reading.<br>
-    (Default, view_Device_name 0)<br>
+      The actor names defined in xs1 are read as Reading.<br>
+      (Default, view_Device_name 0)<br>
     </li><br>
     <li>view_Device_function (0,1)<br>
-    The actuator functions defined in xs1 are read out as Reading.<br>
-    (Default, view_Device_function 0)<br>
+      The actuator functions defined in xs1 are read out as Reading.<br>
+      (Default, view_Device_function 0)<br>
     </li><br>
     <li>xs1_blackl_aktor<br>
-    A comma-separated blacklist of actuators, which should not be created automatically as soon as xs1_control = 1(aktiv).<br>
-    (Example: 2,40,3)<br>
+      A comma-separated blacklist of actuators, which should not be created automatically as soon as xs1_control = 1(aktiv).<br>
+      (Example: 2,40,3)<br>
     </li><br>
     <li>xs1_blackl_sensor<br>
-    A comma-separated blacklist of sensors, which should not be created automatically as soon as xs1_control = 1(aktiv).<br>
-    (Example: 3,37,55)<br>
+      A comma-separated blacklist of sensors, which should not be created automatically as soon as xs1_control = 1(aktiv).<br>
+      (Example: 3,37,55)<br>
     </li><br>
     <li>xs1_control (0,1)<br>
-    Option to control the xs1. After activating this, the xs1Dev module creates each actuator and sensor in FHEM.<br>
-    (Default, xs1_control 0)<br><br>
-    <li>xs1_interval (0,30,60,180,360)<br>
-    This is the interval in seconds at which readings are read from xs1<br>
-    <i>For actuators, only different states are updated in the set interval.</i><br>
-    <i>Sensors are always updated in intervals, regardless of the status.</i><br>
-    (Default, xs1_interval 60)
-    </li><br>
+      Option to control the xs1. After activating this, the xs1Dev module creates each actuator and sensor in FHEM.<br>
+      (Default, xs1_control 0)<br><br>
+      <li>xs1_interval (0,30,60,180,360)<br>
+        This is the interval in seconds at which readings are read from xs1<br>
+        <i>For actuators, only different states are updated in the set interval.</i><br>
+        <i>Sensors are always updated in intervals, regardless of the status.</i><br>
+        (Default, xs1_interval 60)
+      </li><br>
     </li><br><br>
   </ul>
+
   <b>explanation:</b>
   <ul>
     <li>various Readings:</li>
@@ -791,7 +794,8 @@ sub is_in_array($$$) {
     (This can happen more often with DLAN.)<br><br></li>
     <li>If the device has not been connected after 5 connection attempts, the module will switch on < disable > !</li><br>
     <li>Create logfile automatically after define | scheme: <code>define FileLog_xs1Bridge FileLog ./log/xs1Bridge-%Y-%m.log &lt;name&gt;</code><br>
-      The following values ​​are recorded in logfile: Timer | xs1-status information</li>
+      The following values ​​are recorded in logfile: Timer | xs1-status information
+    </li>
   </ul>
 </ul>
 =end html
@@ -805,89 +809,93 @@ sub is_in_array($$$) {
   <br><br>
 
   Das Modul wurde entwickelt basierend auf dem Firmwarestand v4-Beta des xs1. Es kann aufgrund von unterschiedlichen Anpassungen innerhalb der Firmware des Herstellers zu Fehlern kommen.<br>
-  Getestete Firmware: v4.0.0.5326 (Beta) @me | v3.0.0.4493 @ForumUser<br>
+  Getestete Firmware: v4.0.0.5326 (Beta) @me | v3.0.0.4493 @ForumUser<br><br>
+  <ul>
+    <u>Derzeit implementierte Typen des xs1 zur Verarbeitung:</u><br>
 
-  <br><ul>
-  <u>Derzeit implementierte Typen des xs1 zur Verarbeitung: </u><br>
-  <li>Aktor: dimmer, switch, shutter, timerswitch</li>
-  <li>Sensor: barometer, counter, counterdiff, light, motion, other, rain, rain_1h, rain_24h, rainintensity, remotecontrol, uv_index, waterdetector, winddirection, windgust, windspeed, windvariance</li>
+    <li>Aktor: dimmer, switch, shutter, timerswitch</li>
+    <li>Sensor: barometer, counter, counterdiff, light, motion, other, rain, rain_1h, rain_24h, rainintensity, remotecontrol, uv_index, waterdetector, winddirection, windgust, windspeed, windvariance</li>
   </ul><br><br>
 
   <a name="xs1Bridge_define"></a>
   <b>Define</b><br>
     <ul>
-    xs1 ohne Passwortabfrage:&nbsp;&nbsp;<code>define &lt;NAME&gt; xs1Bridge &lt;IP&gt;</code><br>
-    xs1 mit Passwortabfrage:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>define &lt;NAME&gt; xs1Bridge &lt;User&gt;:&lt;Passwort&gt;@&lt;IP&gt;</code>
-    <br><br>
+      xs1 ohne Passwortabfrage:&nbsp;&nbsp;<code>define &lt;NAME&gt; xs1Bridge &lt;IP&gt;</code><br>
+      xs1 mit Passwortabfrage:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<code>define &lt;NAME&gt; xs1Bridge &lt;User&gt;:&lt;Passwort&gt;@&lt;IP&gt;</code>
+      <br><br>
 
-    Ein anlegen des Modules ohne Angabe der IP vom xs1 ist nicht m&ouml;glich. Sollte die IP bei der Moduldefinierung nicht erreichbar sein, so bricht der Define Vorgang ab.
+      Ein anlegen des Modules ohne Angabe der IP vom xs1 ist nicht m&ouml;glich. Sollte die IP bei der Moduldefinierung nicht erreichbar sein, so bricht der Define Vorgang ab.
       <ul>
-      <li><code>&lt;IP&gt;</code> ist IP-Adresse im lokalen Netzwerk</li>
-      <li><code>&lt;User&gt;</code> ist der Administrator Benutzer admin (standard)</li>
-      <li><code>&lt;Passwort&gt;</code> ist das vergebene Administrator Passwort im xs1.</li>
+        <li><code>&lt;IP&gt;</code> ist IP-Adresse im lokalen Netzwerk</li>
+        <li><code>&lt;User&gt;</code> ist der Administrator Benutzer admin (standard)</li>
+        <li><code>&lt;Passwort&gt;</code> ist das vergebene Administrator Passwort im xs1.</li>
       </ul><br>
-    Beispiele:
-    <ul>
-    define EZcontrol_xs1 xs1Bridge 192.168.1.45<br>
-    define EZcontrol_xs1 xs1Bridge admin:geheim@192.168.1.45<br>
-    </ul> 
+
+      Beispiele:
+      <ul>
+        define EZcontrol_xs1 xs1Bridge 192.168.1.45<br>
+        define EZcontrol_xs1 xs1Bridge admin:geheim@192.168.1.45<br>
+      </ul>
     </ul><br>
+
   <b>Set</b>
-  <ul>N/A</ul><br>
+    <ul>N/A</ul><br>
+
   <b>Get</b><br>
-  <ul>N/A</ul><br>
+    <ul>N/A</ul><br>
+
   <a name="xs1_attr"></a>
   <b>Attribute</b>
   <ul>
     <li>debug (0,1,2)<br>
-    Dies bringt das Modul in eine sehr ausf&uuml;hrliche Debug-Ausgabe im Logfile. Somit lassen sich Programmteile kontrollieren und Fehler &uuml;berpr&uuml;fen.<br>
-    (Default, debug 0)
+      Dies bringt das Modul in eine sehr ausf&uuml;hrliche Debug-Ausgabe im Logfile. Somit lassen sich Programmteile kontrollieren und Fehler &uuml;berpr&uuml;fen.<br>
+      (Default, debug 0)
     </li><br>
     <li>update_only_difference (0,1)<br>
-    Die Aktoren welche im xs1 definiert wurden, werden nur bei Wert&auml;nderung aktualisiert.<br>
-    (Default, update_only_difference 0)</li><br>
+      Die Aktoren welche im xs1 definiert wurden, werden nur bei Wert&auml;nderung aktualisiert.<br>
+      (Default, update_only_difference 0)</li><br>
     <li>view_Device_name (0,1)<br>
-    Die Aktor Namen welche im xs1 definiert wurden, werden als Reading ausgelesen.<br>
-    (Default, view_Device_name 0)<br>
+      Die Aktor Namen welche im xs1 definiert wurden, werden als Reading ausgelesen.<br>
+      (Default, view_Device_name 0)<br>
     </li><br>
     <li>view_Device_function (0,1)<br>
-    Die Aktor Funktionen welche im xs1 definiert wurden, werden als Reading ausgelesen.<br>
-    (Default, view_Device_function 0)<br>
+      Die Aktor Funktionen welche im xs1 definiert wurden, werden als Reading ausgelesen.<br>
+      (Default, view_Device_function 0)<br>
     </li><br>
     <li>xs1_blackl_aktor<br>
-    Eine kommagetrennte Blacklist der Aktoren, welche nicht automatisch angelegt werden sollen sobald xs1_control = 1(aktiv).<br>
-    (Beispiel: 2,40,3)<br>
+      Eine kommagetrennte Blacklist der Aktoren, welche nicht automatisch angelegt werden sollen sobald xs1_control = 1(aktiv).<br>
+      (Beispiel: 2,40,3)<br>
     </li><br>
     <li>xs1_blackl_sensor<br>
-    Eine kommagetrennte Blacklist der Sensoren, welche nicht automatisch angelegt werden sollen sobald xs1_control = 1(aktiv).<br>
-    (Beispiel: 3,37,55)<br>
+      Eine kommagetrennte Blacklist der Sensoren, welche nicht automatisch angelegt werden sollen sobald xs1_control = 1(aktiv).<br>
+      (Beispiel: 3,37,55)<br>
     </li><br>
     <li>xs1_control (0,1)<br>
-    Die Freigabe zur Steuerung des xs1. Nach Aktivierung dieser, wird durch das xs1Dev Modul jeder Aktor und Sensor in FHEM angelegt.<br>
-    (Default, xs1_control 0)<br>
+      Die Freigabe zur Steuerung des xs1. Nach Aktivierung dieser, wird durch das xs1Dev Modul jeder Aktor und Sensor in FHEM angelegt.<br>
+      (Default, xs1_control 0)<br>
     </li><br>
     <li>xs1_interval (0,30,60,180,360)<br>
-    Das ist der Intervall in Sekunden, in dem die Readings neu gelesen werden vom xs1.<br>
-    <i>Bei Aktoren werden nur unterschiedliche Zust&auml;nde aktualisiert im eingestellten Intervall.</i><br>
-    <i>Sensoren werden unabhängig vom Zustand immer im Intervall aktualisiert.</i><br>
-    (Default, xs1_interval 60)
+      Das ist der Intervall in Sekunden, in dem die Readings neu gelesen werden vom xs1.<br>
+      <i>Bei Aktoren werden nur unterschiedliche Zust&auml;nde aktualisiert im eingestellten Intervall.</i><br>
+      <i>Sensoren werden unabhängig vom Zustand immer im Intervall aktualisiert.</i><br>
+      (Default, xs1_interval 60)
     </li><br><br>
   </ul>
   <b>Erl&auml;uterung:</b>
   <ul>
     <li>Auszug Readings:</li>
     <ul>
-    <li>Aktor_(01-64)</li> definierter Aktor mit jeweiligem Zustand im Ger&auml;t<br>
-    <li>Aktor_(01-64)_name</li> definierter Aktorname im Ger&auml;t<br>
-    <li>Aktor_(01-64)_function(1-4)</li> definierte Aktorfunktion im Ger&auml;t<br>
-    <li>Sensor_(01-64)</li> definierter Sensor im Ger&auml;t<br>
-    <li>Sensor_(01-64)</li> definierter Sensorname im Ger&auml;t<br>
-    <li>Timer_(01-128)</li> definierter Timer im Ger&auml;t<br>
-    <li>xs1_bootloader</li> Firmwareversion des Bootloaders<br>
-    <li>xs1_dhcp</li> DHCP an/aus<br>
-    <li>xs1_features</li> erworbene Feature beim Kauf (A = SENDEN | B = EMPFANGEN | C = Skripte/Makros | D = Speicherkartenzugriff)<br>
-    <li>xs1_firmware</li> Firmwareversion<br>
-    <li>xs1_start</li> Ger&auml;testart<br>
+      <li>Aktor_(01-64)</li> definierter Aktor mit jeweiligem Zustand im Ger&auml;t<br>
+      <li>Aktor_(01-64)_name</li> definierter Aktorname im Ger&auml;t<br>
+      <li>Aktor_(01-64)_function(1-4)</li> definierte Aktorfunktion im Ger&auml;t<br>
+      <li>Sensor_(01-64)</li> definierter Sensor im Ger&auml;t<br>
+      <li>Sensor_(01-64)</li> definierter Sensorname im Ger&auml;t<br>
+      <li>Timer_(01-128)</li> definierter Timer im Ger&auml;t<br>
+      <li>xs1_bootloader</li> Firmwareversion des Bootloaders<br>
+      <li>xs1_dhcp</li> DHCP an/aus<br>
+      <li>xs1_features</li> erworbene Feature beim Kauf (A = SENDEN | B = EMPFANGEN | C = Skripte/Makros | D = Speicherkartenzugriff)<br>
+      <li>xs1_firmware</li> Firmwareversion<br>
+      <li>xs1_start</li> Ger&auml;testart<br>
     </ul><br>
     <li>Die Meldung "<code>Error: Can't connect ...</code>" oder "<code>ERROR: empty answer received</code>" im System-Logfile, besagt das kurzzeitig keine Abfrage erfolgen konnte.<br>
     (Das kann h&auml;ufiger bei DLAN vorkommen.)<br><br></li>
