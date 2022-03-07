@@ -30,7 +30,7 @@ eval "use Net::Ping;1" or $missingModul .= "Net::Ping ";
 
 
 ##########################
-sub xs1Bridge_Initialize($) {
+sub xs1Bridge_Initialize {
   my ($hash) = @_;
 
   $hash->{WriteFn}    = "xs1Bridge_Write";
@@ -58,7 +58,7 @@ sub xs1Bridge_Initialize($) {
 
 
 ##########################
-sub xs1Bridge_Define($$) {
+sub xs1Bridge_Define {
   my ($hash, $def) = @_;
   my @arg = split("[ \t][ \t]*", $def);
   my $name = $hash->{NAME};             ## Der Definitionsname, mit dem das Gerät angelegt wurde.
@@ -113,12 +113,12 @@ sub xs1Bridge_Define($$) {
     Log3 $name, 4, "$typ: FileLog_xs1Bridge ist definiert";
   }
 
-  return undef;
+  return;
 }
 
 
 ##########################
-sub xs1Bridge_Attr(@) {
+sub xs1Bridge_Attr {
   my ($cmd,$name,$attrName,$attrValue) = @_;
   my $hash = $defs{$name};
   my $typ = $hash->{TYPE};
@@ -244,12 +244,12 @@ sub xs1Bridge_Attr(@) {
     InternalTimer(gettimeofday()+$xs1_interval, "xs1Bridge_GetUpDate", $hash);
     Debug " $typ: Attr | RemoveInternalTimer + InternalTimer" if($debug == 2);
   }
-  return undef;
+  return;
 }
 
 
 ##########################
-sub xs1Bridge_GetUpDate() {
+sub xs1Bridge_GetUpDate {
   my ($hash) = @_;
   my $name = $hash->{NAME};
   my $typ = $hash->{TYPE};
@@ -567,8 +567,7 @@ sub xs1Bridge_GetUpDate() {
 
 
 ##########################
-sub xs1Bridge_Write($)      ## Zustellen von Daten via IOWrite() vom logischen zum physischen Modul 
-{
+sub xs1Bridge_Write {           ## Zustellen von Daten via IOWrite() vom logischen zum physischen Modul
   my ($hash, $Aktor_ID, $xs1_typ, $cmd, $cmd2) = @_;
   my $name = $hash->{NAME};
   my $typ = $hash->{TYPE};
@@ -630,7 +629,7 @@ sub xs1Bridge_Write($)      ## Zustellen von Daten via IOWrite() vom logischen z
   if ($Http_err ne "") {
     ($Http_err) = $Http_err =~ /[:]\s.*/g;
     Log3 $name, 3, "$typ: Write | no Control possible | Error".$Http_err;
-    return undef;
+    return;
   } elsif ($Http_data ne "") {
     Debug " $typ: Write | Send to xs1 -> $xs1cmd" if($debug == 1);    ## Kontrolle Sendebefehl
   }
@@ -638,7 +637,7 @@ sub xs1Bridge_Write($)      ## Zustellen von Daten via IOWrite() vom logischen z
 
 
 ##########################
-sub xs1Bridge_Undef($$) {
+sub xs1Bridge_Undef {
   my ( $hash, $name) = @_;
   my $typ = $hash->{TYPE};
 
@@ -654,14 +653,14 @@ sub xs1Bridge_Undef($$) {
     }
   }
 
-  return undef;
+  return;
 }
 
 
 ##########################
 # eigene Sub
 
-sub is_in_array($$$) {
+sub is_in_array {
   my ( $hash,$xs1_id,$i) = @_;
   my $name = $hash->{NAME};
   my $typ = $hash->{TYPE};
