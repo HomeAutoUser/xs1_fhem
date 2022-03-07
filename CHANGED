@@ -1,8 +1,9 @@
-2022-03-07 - Update 88_xs1Dev.pm
 2022-03-07 - Update CHANGED
 2022-03-07 - Update 88_xs1Bridge.pm
   * revised perlcritic
+  * revised code
   * little dispatch fix 'Unknown code ... , help me!'
 2022-03-07 - Update 88_xs1Dev.pm
   * revised perlcritic
+  * revised code
 2022-03-07 - added xs1_fhem project from SVN
