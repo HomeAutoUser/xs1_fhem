@@ -85,17 +85,17 @@ sub xs1Bridge_Define {
   }
 
   # Parameter Define
-  my $xs1_ip = $arg[2];           ## Zusatzparameter 1 bei Define - ggf. nur in Sub
+  my $xs1_ip = $arg[2];               ## Zusatzparameter 1 bei Define - ggf. nur in Sub
   $hash->{xs1_ip} = $xs1_ip;
 
-  $hash->{STATE} = "Initialized"; ## Der Status des Modules nach Initialisierung.
-  $hash->{TIME} = time();         ## Zeitstempel, derzeit vom anlegen des Moduls
-  $hash->{VERSION} = "1.27";      ## Version
-  $hash->{BRIDGE} = 1;
+  $hash->{BRIDGE}   = 1;
+  $hash->{STATE}    = "Initialized";  ## Der Status des Modules nach Initialisierung.
+  $hash->{TIME}     = time();         ## Zeitstempel, derzeit vom anlegen des Moduls
+  $hash->{VERSION}  = "1.27";         ## Version
 
   # Attribut gesetzt
-  $attr{$name}{xs1_interval}  = "60"  if( not defined( $attr{$name}{xs1_interval} ) );
-  $attr{$name}{xs1_control} = "0" if( not defined( $attr{$name}{xs1_control} ) );
+  $attr{$name}{xs1_interval}  = "60" if( not defined( $attr{$name}{xs1_interval} ) );
+  $attr{$name}{xs1_control}   = "0" if( not defined( $attr{$name}{xs1_control} ) );
 
   $modules{xs1Bridge}{defptr}{BRIDGE} = $hash;
 
@@ -126,22 +126,18 @@ sub xs1Bridge_Attr {
   @string_attrValue = split(",",$attrValue) if (defined $attrValue);    ## for Check Blacklist
   my $length = scalar @string_attrValue;                                ## for Check Blacklist
 
-  # $cmd  - Vorgangsart - kann die Werte "del" (löschen) oder "set" (setzen) annehmen
-  # $name - Gerätename
-  # $attrName/$attrValue sind Attribut-Name und Attribut-Wert
-
   #### Handling bei set .. attribute
   if ($cmd eq "set") {
     RemoveInternalTimer($hash);                                   ## Timer löschen
     Debug " $typ: Attr | Cmd:$cmd | RemoveInternalTimer" if($debug == 2);
 
       ### xs1_interval == 0 ###
-    if ($attrName eq "xs1_interval" && $attrValue == 0) {         ## Handling xs1_interval == 0
+    if ($attrName eq "xs1_interval" && $attrValue == 0) {
       RemoveInternalTimer($hash);
       readingsSingleUpdate($hash, "state", "deactive", 1);
 
       ### xs1_interval >= 30 ###
-    } elsif ($attrName eq "xs1_interval" && $attrValue >= 30) {    ## Handling xs1_interval >= 30
+    } elsif ($attrName eq "xs1_interval" && $attrValue >= 30) {
       $xs1_ConnectionTry = 1;
       my $xs1_interval = $attrValue;
       InternalTimer(gettimeofday()+$xs1_interval, "xs1Bridge_GetUpDate", $hash);
@@ -149,21 +145,19 @@ sub xs1Bridge_Attr {
 
       ### view_Device_function ###
     } elsif ($attrName eq "view_Device_function") {
-      if ($attrValue eq "1") {                  ## Handling view_Device_function 1
+      if ($attrValue eq "1") {
         #Log3 $name, 3, "$typ: Attribut view_Device_function $cmd to $attrValue";
-      }
-      elsif ($attrValue eq "0") {                 ## Handling view_Device_function 0
+      } elsif ($attrValue eq "0") {
         #Log3 $name, 3, "$typ: Attribut view_Device_function $cmd to $attrValue";
       }
 
       ### view_Device_name ###
     } elsif ($attrName eq "view_Device_name") {
-        if ($attrValue eq "1") {                ## Handling view_Device_name 1
+        if ($attrValue eq "1") {
           #Log3 $name, 3, "$typ: Attribut view_Device_name $cmd to $attrValue";
-        }
-        elsif ($attrValue eq "0") {               ## Handling view_Device_name 0
-            #Log3 $name, 3, "$typ: Attribut view_Device_name $cmd to $attrValue";
-            for my $i (0..64) {
+        } elsif ($attrValue eq "0") {
+          #Log3 $name, 3, "$typ: Attribut view_Device_name $cmd to $attrValue";
+          for my $i (0..64) {
             delete $hash->{READINGS}{"Aktor_".sprintf("%02d", $i)."_name"} if($hash->{READINGS});
             delete $hash->{READINGS}{"Sensor_".sprintf("%02d", $i)."_name"} if($hash->{READINGS});
           }
@@ -171,10 +165,9 @@ sub xs1Bridge_Attr {
 
       ### update_only_difference - Wertaenderung nur bei Difference ###
     } elsif ($attrName eq "update_only_difference") {
-      if ($attrValue eq "1") {                ## Handling update_only_difference 1
+      if ($attrValue eq "1") {
         #Log3 $name, 3, "$typ: Attribut update_only_difference $cmd to $attrValue";
-      }
-      elsif ($attrValue eq "0") {               ## Handling update_only_difference 0
+      } elsif ($attrValue eq "0") {
         #Log3 $name, 3, "$typ: Attribut update_only_difference $cmd to $attrValue";
         for my $i (0..64) {
           delete $hash->{READINGS}{"Aktor_".sprintf("%02d", $i)."_name"} if($hash->{READINGS});
@@ -183,7 +176,7 @@ sub xs1Bridge_Attr {
 
       ### xs1 - steuern ###
     } elsif ($attrName eq "xs1_control") {
-      if ($attrValue eq "1") {                    ## Handling xs1_control 1
+      if ($attrValue eq "1") {
         if(! $modules{xs1Dev}) {                  ## Check Modul vorhanden
           $attr{$name}{xs1_control} = "0";
           return "Module xs1Dev is non-existent or still under development. Please wait"
@@ -191,7 +184,7 @@ sub xs1Bridge_Attr {
       }
 
       ### Blacklist - Aktor / Sensor ###
-    } elsif ($attrName eq "xs1_blackl_aktor") {   ## Handling xs1_blackl_aktor
+    } elsif ($attrName eq "xs1_blackl_aktor") {
       for (my $x = 0; $x < $length ; $x++) {
         if ($string_attrValue[$x]  =~ /^[1-9]{1}\d*/ && $string_attrValue[$x] <65) {
           ## RICHTIG ##
@@ -201,7 +194,7 @@ sub xs1Bridge_Attr {
       }
       Log3 $name, 4, "$typ: Attribut xs1_blackl_aktor $attrValue";
 
-    } elsif ($attrName eq "xs1_blackl_sensor") {  ## Handling xs1_blackl_sensor
+    } elsif ($attrName eq "xs1_blackl_sensor") {
       for (my $x = 0; $x < $length ; $x++) {
         if ($string_attrValue[$x]  =~ /^[1-9]{1}\d*/ && $string_attrValue[$x] <65) {
           ## RICHTIG ##
@@ -215,12 +208,12 @@ sub xs1Bridge_Attr {
 
   #### Handling bei del ... attribute
   if ($cmd eq "del") {
-    if ($attrName eq "xs1_interval") {              ## Handling deleteattr xs1_interval
+    if ($attrName eq "xs1_interval") {
       RemoveInternalTimer($hash);
       readingsSingleUpdate($hash, "state", "deactive", 1);
       Debug " $typ: Attr | Cmd:$cmd | $attrName" if($debug == 2);
 
-    } elsif ($attrName eq "view_Device_function") { ## Handling deleteattr view_Device_function
+    } elsif ($attrName eq "view_Device_function") {
       Log3 $name, 3, "$typ: Attribut view_Device_function delete";
       for my $i (0..64) {
         for my $i2 (1..4) {
@@ -228,7 +221,7 @@ sub xs1Bridge_Attr {
         }
       }
 
-    } elsif ($attrName eq "view_Device_name") {     ## Handling deleteattr view_Device_name
+    } elsif ($attrName eq "view_Device_name") {
       Log3 $name, 3, "$typ: Attribut view_Device_name delete";
       for my $i (0..64) {
         delete $hash->{READINGS}{"Aktor_".sprintf("%02d", $i)."_name"} if($hash->{READINGS});
@@ -258,15 +251,15 @@ sub xs1Bridge_GetUpDate {
   my $state = $hash->{STATE};
   my $xs1_ip = $hash->{xs1_ip};
 
-  my $xs1_uptimeStart = $hash->{helper}{xs1_uptimeStart};
-  my $xs1_uptimeOld = $hash->{helper}{xs1_uptimeOld};
-  my $xs1_uptimeNew = $hash->{helper}{xs1_uptimeNew};
   my $def;
+  my $xs1_uptimeNew   = $hash->{helper}{xs1_uptimeNew};
+  my $xs1_uptimeOld   = $hash->{helper}{xs1_uptimeOld};
+  my $xs1_uptimeStart = $hash->{helper}{xs1_uptimeStart};
 
   #http://x.x.x.x/control?callback=cname&cmd=...
-  #get_list_actuators        - list all actuators     i0
-  #get_list_sensors          - list all sensors     i1
-  #get_list_timers           - list all timers      i3
+  #get_list_actuators        - list all actuators       i0
+  #get_list_sensors          - list all sensors         i1
+  #get_list_timers           - list all timers          i3
   #get_config_info           - list all device info´s   i2
   #get_protocol_info         - list protocol info´s
 
@@ -276,13 +269,13 @@ sub xs1Bridge_GetUpDate {
   my @readingsname = ("Aktor","Sensor","","Timer","");
 
   my $debug = AttrVal($hash->{NAME},"debug",0);
-  my $xs1_interval = AttrVal($name, "xs1_interval", 60);
-  my $viewDeviceName = AttrVal($hash->{NAME},"view_Device_name",0);
-  my $viewDeviceFunction = AttrVal($hash->{NAME},"view_Device_function",0);
   my $update_only_difference = AttrVal($hash->{NAME},"update_only_difference",0);
-  my $xs1_control = AttrVal($hash->{NAME},"xs1_control",0);
+  my $viewDeviceFunction = AttrVal($hash->{NAME},"view_Device_function",0);
+  my $viewDeviceName = AttrVal($hash->{NAME},"view_Device_name",0);
   my $xs1_blackl_aktor = AttrVal($hash->{NAME},"xs1_blackl_aktor",0);
   my $xs1_blackl_sensor = AttrVal($hash->{NAME},"xs1_blackl_sensor",0);
+  my $xs1_control = AttrVal($hash->{NAME},"xs1_control",0);
+  my $xs1_interval = AttrVal($name, "xs1_interval", 60);
 
   #### xs1Bridge xs1_interval >= 10 -> aktiviert zum auslesen
   if ($xs1_interval >= 10 && $xs1_ConnectionTry <= 5) {
@@ -298,8 +291,7 @@ sub xs1Bridge_GetUpDate {
 
     my $xs1Dev_check = "ERROR";
 
-    #if($modules{xs1Dev} && $modules{xs1Dev}{LOADED}) {   ## Check Modul vorhanden + geladen
-    if($modules{xs1Dev}) {                  ## Check Modul vorhanden
+    if($modules{xs1Dev}) {    ## Check Modul vorhanden
       $xs1Dev_check = "ok";
       Debug " $typ: GetUpDate | Modul xs1Dev_check = $xs1Dev_check" if($debug == 2);
     } else {
@@ -311,22 +303,22 @@ sub xs1Bridge_GetUpDate {
     for my $i (0..3) {
       #### HTTP Requests #### Start ####
       my $connection;
-      my $Http_err  = "";
-      my $Http_data   = "";
-      my $param     =   {
-                  url        => "http://".$xs1_ip.$cmd.$cmdtyp[$i],
-                  timeout    => 3,
-                  method     => "GET",    # Lesen von Inhalten
-                };
+      my $Http_err = "";
+      my $Http_data = "";
+      my $param = {
+                    url     => "http://".$xs1_ip.$cmd.$cmdtyp[$i],
+                    timeout => 3,
+                    method  => "GET", # Lesen von Inhalten
+                  };
 
       #HttpUtils_BlockingGet($param);
       ($Http_err, $Http_data) = HttpUtils_BlockingGet($param);
       #### HTTP Requests #### END ####  
 
       my $adress = "http://".$xs1_ip.$cmd.$cmdtyp[$i];
+      my $decoded;
       my $json;
       my $json_utf8;
-      my $decoded;
 
       Debug " $typ: GetUpDate | Adresse: $adress | xs1_ConnectionTry=$xs1_ConnectionTry" if($debug == 1 && $Http_err eq "");
       Debug " $typ: GetUpDate | HTTP request: ".$Http_err."| xs1_ConnectionTry=$xs1_ConnectionTry" if($debug == 1 && $Http_err ne "");
@@ -382,7 +374,7 @@ sub xs1Bridge_GetUpDate {
                 #### xs1 Aktoren nur update bei differenten Wert
                 if ($update_only_difference == 1) {
                   my $oldState = ReadingsVal($name, $readingsname[$i]."_".sprintf("%02d", $i3), "unknown"); ## Readings Wert
-                  my $newState = sprintf("%.1f" , $f->{"value"});                           ## ARRAY Wert xs1 aktuell
+                  my $newState = sprintf("%.1f" , $f->{"value"});                                           ## ARRAY Wert xs1 aktuell
 
                   Debug " $typ: ".$readingsname[$i]."_".sprintf("%02d", $i3)." oldState=$oldState newState=$newState" if($debug == 2);
 
@@ -400,8 +392,8 @@ sub xs1Bridge_GetUpDate {
 
                   #### xs1 Option - Ansicht Funktionsname
                   if ($viewDeviceFunction == 1) {
-                    my $oldState = ReadingsVal($name, $readingsname[$i]."_".sprintf("%02d", $i3)."_".$arrayname[4]."_".$i2, "unknown");   ## Readings Wert
-                    my $newState = $f2->{'type'};   ## ARRAY Wert xs1 aktuell
+                    my $oldState = ReadingsVal($name, $readingsname[$i]."_".sprintf("%02d", $i3)."_".$arrayname[4]."_".$i2, "unknown"); ## Readings Wert
+                    my $newState = $f2->{'type'};                                                                                       ## ARRAY Wert xs1 aktuell
 
                     if ($oldState ne "unknown" && $newState eq "disabled") {  ## FunktionReading del bei disable
                       Debug " $typ: "."Aktor_".sprintf("%02d", $i3)."_function_".$i2." are disabled" if($debug == 2);
@@ -419,11 +411,11 @@ sub xs1Bridge_GetUpDate {
                   if ($f2->{"type"} ne "disabled") {
                     if ($i2 == 1) {
                       $xs1_function1 = $f2->{"type"};
-                    }elsif ($i2 == 2) {
+                    } elsif ($i2 == 2) {
                       $xs1_function2 = $f2->{"type"};
-                    }elsif ($i2 == 3) {
+                    } elsif ($i2 == 3) {
                       $xs1_function3 = $f2->{"type"};
-                    }elsif ($i2 == 4) {
+                    } elsif ($i2 == 4) {
                       $xs1_function4 = $f2->{"type"};
                     }
                   }
@@ -434,7 +426,7 @@ sub xs1Bridge_GetUpDate {
               if ($i == 1 || $i == 0 && $update_only_difference == 0) {   # Aktoren | Sensoren im intervall - Format 0.0 bzw. 37.0 wie aus xs1
                 readingsSingleUpdate($hash, $readingsname[$i]."_".sprintf("%02d", $i3) , sprintf("%.1f" , $f->{"value"}), 0);
                 $xs1_data = $xs1Dev."#".$readingsname[$i]."#".sprintf("%02d", $i3)."#".$f->{"type"}."#".sprintf("%.1f" , $f->{"value"})."#"."$xs1_function1"."#"."$xs1_function2"."#"."$xs1_function3"."#"."$xs1_function4"."#".$f->{"name"};
-              } elsif ($i == 0 && $update_only_difference == 1){        # Aktoren | nur bei DIFF - Format 0.0 bzw. 37.0 wie aus xs1
+              } elsif ($i == 0 && $update_only_difference == 1){          # Aktoren | nur bei DIFF - Format 0.0 bzw. 37.0 wie aus xs1
                 $xs1_data = $xs1Dev."#".$readingsname[$i]."#".sprintf("%02d", $i3)."#".$f->{"type"}."#".sprintf("%.1f" , $f->{"value"})."#"."$xs1_function1"."#"."$xs1_function2"."#"."$xs1_function3"."#"."$xs1_function4"."#".$f->{"name"};
               }
 
@@ -460,7 +452,7 @@ sub xs1Bridge_GetUpDate {
               }
 
             } else {
-            #### ID bzw. Speicherplatz xs1 ist disabled | Reading are delete
+              #### ID bzw. Speicherplatz xs1 ist disabled | Reading are delete
               delete $hash->{READINGS}{$readingsname[$i]."_".sprintf("%02d", $i3)} if($hash->{READINGS});
               delete $hash->{READINGS}{$readingsname[$i]."_".sprintf("%02d", $i3)."_name"} if($hash->{READINGS});
 
@@ -481,7 +473,6 @@ sub xs1Bridge_GetUpDate {
                 #Log3 $name, 3, "$typ: GetUpDate | for delete FileLog_$delDevice";
                 fhem("delete FileLog_".$delDevice);   ## delete FileLog_Device
               }
-
               ### Erweiterung v1.20 ### Device | Logfile | SVG löschen wenn in xs1 disable - TEST ### ENDE ###
 
               if ($i == 0) {
@@ -501,11 +492,11 @@ sub xs1Bridge_GetUpDate {
           my @xs1_decoded = (FmtDateTime(time()-($decoded->{'info'}{'uptime'})) , $decoded->{'info'}{'devicename'} , $decoded->{'info'}{'bootloader'} , $decoded->{'info'}{'hardware'} , $features , $decoded->{'info'}{'firmware'} , $decoded->{'info'}{'mac'} , $decoded->{'info'}{'autoip'});
 
           my $oldState = ReadingsVal($name, $xs1_readings[0], "2000-01-01 03:33:33"); ## Readings Wert
-          my @oldstate = split (/[-,:,\s\/]/, $oldState);               ## Split $year, $month, $mday, $hour, $min, $sec
+          my @oldstate = split (/[-,:,\s\/]/, $oldState);                             ## Split $year, $month, $mday, $hour, $min, $sec
           $oldState = fhemTimeGm($oldstate[5], $oldstate[4], $oldstate[3], $oldstate[2], $oldstate[1]-1, $oldstate[0]-1900);  ## Verarbeitung $sec, $min, $hour, $mday, $month-1, $year-1900
 
-          my $newState = FmtDateTime(time()-($decoded->{'info'}{'uptime'}));      ## ARRAY uptime Wert xs1 aktuell
-          my @newState = split (/[-,:,\s\/]/, $newState);               ## Split $year, $month, $mday, $hour, $min, $sec
+          my $newState = FmtDateTime(time()-($decoded->{'info'}{'uptime'}));  ## ARRAY uptime Wert xs1 aktuell
+          my @newState = split (/[-,:,\s\/]/, $newState);                     ## Split $year, $month, $mday, $hour, $min, $sec
           $newState = fhemTimeGm($newState[5], $newState[4], $newState[3], $newState[2], $newState[1]-1, $newState[0]-1900);  ## Verarbeitung $sec, $min, $hour, $mday, $month-1, $year-1900
 
           #### Vergleich mit 5 Sekunden Tolleranz je Verarbeitungszeit Netzwerk | DLAN | CPU
@@ -535,14 +526,14 @@ sub xs1Bridge_GetUpDate {
           my @array = @{ $decoded->{$arrayname[$i]} };
           foreach my $f ( @array ) {
             my $oldState = ReadingsVal($name, $readingsname[$i]."_".sprintf("%02d", $f->{"id"}), "unknown");  ## Readings Wert
-            my $newState = FmtDateTime($f->{"next"});     ## ARRAY Wert xs1 aktuell
+            my $newState = FmtDateTime($f->{"next"});                                                         ## ARRAY Wert xs1 aktuell
 
             if ($f->{"type"} ne "disabled") {
-              if ($oldState ne $newState) {         ## Update Reading nur bei Wertänderung
+              if ($oldState ne $newState) {     ## Update Reading nur bei Wertänderung
                 readingsSingleUpdate($hash, $readingsname[$i]."_".sprintf("%02d", $f->{"id"}) , FmtDateTime($f->{"next"}), 1);
               }
               Debug " $typ: ".$readingsname[$i]."_".sprintf("%02d", $f->{"id"})." | ".$f->{"name"}." | ".$f->{"type"}." | ". $f->{"next"} if($debug == 2);
-            } elsif ($oldState ne "unknown") {          ## deaktive Timer mit Wert werden als Reading entfernt
+            } elsif ($oldState ne "unknown") {  ## deaktive Timer mit Wert werden als Reading entfernt
               Log3 $name, 3, "$typ: GetUpDate | ".$readingsname[$i]."_".sprintf("%02d", $f->{"id"})." is deactive in xs1";
               delete $defs{$name}{READINGS}{$readingsname[$i]."_".sprintf("%02d", $f->{"id"})};
             }
@@ -559,10 +550,10 @@ sub xs1Bridge_GetUpDate {
     Debug " ------------- ERROR CHECK - ALL END -------------\n " if($debug == 2 || $debug == 1);
   }
 
-  if ($xs1_ConnectionTry == 6) {              ## Abschaltung xs1 nach 5 Verbindungsversuchen
+  if ($xs1_ConnectionTry == 6) {    ## Abschaltung xs1 nach 5 Verbindungsversuchen
     $attr{$name}{xs1_interval}  = "0";
     readingsSingleUpdate($hash, "state", "deactive", 1);
-    RemoveInternalTimer($hash);               ## Timer löschen
+    RemoveInternalTimer($hash);     ## Timer löschen
     Log3 $name, 3, "$typ: GetUpDate | connection ERROR -> xs1 set to disable! Device not reachable after 5 attempts";
   }
 }
@@ -621,11 +612,11 @@ sub xs1Bridge_Write {           ## Zustellen von Daten via IOWrite() vom logisch
   my $connection;
   my $Http_err  = "";
   my $Http_data;
-  my $param   =   {
-            url        => "$xs1cmd",
-            timeout    => 3,
-            method     => "GET",    # Lesen von Inhalten
-          };
+  my $param = {
+                url     => "$xs1cmd",
+                timeout => 3,
+                method  => "GET",    # Lesen von Inhalten
+              };
 
   ($Http_err, $Http_data) = HttpUtils_BlockingGet($param);
   ### HTTP Requests #### END #### 
