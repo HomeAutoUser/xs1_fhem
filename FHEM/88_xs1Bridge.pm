@@ -134,16 +134,20 @@ sub xs1Bridge_Attr {
   if ($cmd eq "set") {
     RemoveInternalTimer($hash);                                   ## Timer löschen
     Debug " $typ: Attr | Cmd:$cmd | RemoveInternalTimer" if($debug == 2);
+
+      ### xs1_interval == 0 ###
     if ($attrName eq "xs1_interval" && $attrValue == 0) {         ## Handling xs1_interval == 0
       RemoveInternalTimer($hash);
       readingsSingleUpdate($hash, "state", "deactive", 1);
+
+      ### xs1_interval >= 30 ###
     } elsif ($attrName eq "xs1_interval" && $attrValue >= 30) {    ## Handling xs1_interval >= 30
       $xs1_ConnectionTry = 1;
       my $xs1_interval = $attrValue;
       InternalTimer(gettimeofday()+$xs1_interval, "xs1Bridge_GetUpDate", $hash);
       readingsSingleUpdate($hash, "state", "active", 1);
 
-      ### Ansicht xs1_Device_function ###
+      ### view_Device_function ###
     } elsif ($attrName eq "view_Device_function") {
       if ($attrValue eq "1") {                  ## Handling view_Device_function 1
         #Log3 $name, 3, "$typ: Attribut view_Device_function $cmd to $attrValue";
@@ -152,7 +156,7 @@ sub xs1Bridge_Attr {
         #Log3 $name, 3, "$typ: Attribut view_Device_function $cmd to $attrValue";
       }
 
-      ### Ansicht xs1_Device_name ###
+      ### view_Device_name ###
     } elsif ($attrName eq "view_Device_name") {
         if ($attrValue eq "1") {                ## Handling view_Device_name 1
           #Log3 $name, 3, "$typ: Attribut view_Device_name $cmd to $attrValue";
@@ -165,7 +169,7 @@ sub xs1Bridge_Attr {
           }
         }
 
-      ### Wertaenderung nur bei Difference ###
+      ### update_only_difference - Wertaenderung nur bei Difference ###
     } elsif ($attrName eq "update_only_difference") {
       if ($attrValue eq "1") {                ## Handling update_only_difference 1
         #Log3 $name, 3, "$typ: Attribut update_only_difference $cmd to $attrValue";
@@ -452,6 +456,9 @@ sub xs1Bridge_GetUpDate {
               ### Dispatch an xs1Device Modul
               if ($xs1Dev_check eq "ok" && $xs1_control == 1) {
                 Debug " $typ: GetUpDate | Dispatch: $xs1_data" if($debug == 2);
+
+                #### Unknown code xs1Dev#Sensor#61#windvariance#0.0#-#-#-#-#x_Windvarianz, help me!
+                Log3 $name, 3, "$typ: GetUpDate | Dispatch -> $xs1_data";
                 Dispatch($hash,$xs1_data,undef) if($xs1_data);
               }
 
