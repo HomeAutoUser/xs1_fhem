@@ -21,7 +21,7 @@ use Time::Local;
 
 
 ########################
-sub xs1Dev_Initialize($) {
+sub xs1Dev_Initialize {
   my ($hash) = @_;
 
   $hash->{Match}      =   "[x][s][1][D][e][v][_][A][k][t][o][r]_[0-6][0-9].*|[x][s][1][D][e][v][_][S][e][n][s][o][r]_[0-6][0-9].*";       ## zum testen - https://regex101.com/
@@ -40,7 +40,7 @@ sub xs1Dev_Initialize($) {
 
 
 ########################
-sub xs1Dev_Define($$) {
+sub xs1Dev_Define {
   # $def --> Definition des Module
   # $hash --> ARRAY des Module
 
@@ -132,12 +132,12 @@ sub xs1Dev_Define($$) {
         # $hash->{xs1_ip} = $hash->{IODev}->{xs1_ip};
   # }
 
-  return undef;
+  return;
 }
 
 
 ########################
-sub xs1Dev_Attr() {
+sub xs1Dev_Attr {
   my ($cmd,$name,$attrName,$attrValue) = @_;
   my $hash = $defs{$name};
   my $typ = $hash->{TYPE};
@@ -148,7 +148,7 @@ sub xs1Dev_Attr() {
 
 
 ########################
-sub xs1Dev_Set ($$@) {
+sub xs1Dev_Set {
   my ( $hash, $name, @args ) = @_;
   my $xs1_ID = $hash->{ID};
   my $typ = $hash->{TYPE};      ## xs1Dev
@@ -256,12 +256,12 @@ sub xs1Dev_Set ($$@) {
     Debug " -------------- ERROR CHECK - END --------------" if($debug);
   }
 
-  return undef;
+  return;
 }
 
 
 ########################
-sub xs1Dev_Parse($$) {          ## Input Data from 88_xs1Bridge
+sub xs1Dev_Parse {          ## Input Data from 88_xs1Bridge
   my ( $io_hash, $data) = @_;   ## $io_hash = ezControl -> def. Name von xs1Bridge
 
   my ($xs1Dev,$xs1_readingsname,$xs1_ID,$xs1_typ2,$xs1_value,$xs1_f1,$xs1_f2,$xs1_f3,$xs1_f4,$xs1_name) = split("#", $data);
@@ -431,13 +431,13 @@ sub xs1Dev_Parse($$) {          ## Input Data from 88_xs1Bridge
 
 
 ########################
-sub xs1Dev_Undef($$) {
+sub xs1Dev_Undef {
   my ( $hash, $name) = @_;
   my $typ = $hash->{TYPE};
 
   delete($modules{xs1Dev}{defptr}{$hash->{ID}});
   Log3 $name, 3, "$typ: Device with Name $name delete";
-  return undef;
+  return;
 }
 
 
