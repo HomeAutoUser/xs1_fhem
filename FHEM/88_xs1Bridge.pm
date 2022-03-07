@@ -456,9 +456,6 @@ sub xs1Bridge_GetUpDate {
               ### Dispatch an xs1Device Modul
               if ($xs1Dev_check eq "ok" && $xs1_control == 1) {
                 Debug " $typ: GetUpDate | Dispatch: $xs1_data" if($debug == 2);
-
-                #### Unknown code xs1Dev#Sensor#61#windvariance#0.0#-#-#-#-#x_Windvarianz, help me!
-                Log3 $name, 3, "$typ: GetUpDate | Dispatch -> $xs1_data";
                 Dispatch($hash,$xs1_data,undef) if($xs1_data);
               }
 
