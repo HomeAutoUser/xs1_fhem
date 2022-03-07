@@ -106,7 +106,6 @@ sub xs1Bridge_Define {
   if(!defined($defs{'FileLog_xs1Bridge'})) {                                      ## Logfile existent check
     Log3 $name, 4, "$typ: FileLog_xs1Bridge ist NICHT definiert";
     fhem("define FileLog_xs1Bridge FileLog ./log/xs1Bridge-%Y-%m.log ".$arg[0]);  ## Logfile define
-    fhem("attr FileLog_xs1Bridge room xs1");                                      ## Logfile in xs1 room
   } else {
     Log3 $name, 4, "$typ: FileLog_xs1Bridge ist definiert";
   }
