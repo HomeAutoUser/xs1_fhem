@@ -3,7 +3,7 @@
 #################################################################
 # logisches Modul - einzelnes Gerät, über das mit physikalisches
 #         Modul kommuniziert werden kann
-# 
+#
 # note / ToDo´s:
 # - PERL WARNING: Use of uninitialized value $_
 # - PERL WARNING: Use of uninitialized value $cmdList in string
@@ -24,14 +24,15 @@ use Time::Local;
 sub xs1Dev_Initialize {
   my ($hash) = @_;
 
-  $hash->{Match}      =   "[x][s][1][D][e][v][_][A][k][t][o][r]_[0-6][0-9].*|[x][s][1][D][e][v][_][S][e][n][s][o][r]_[0-6][0-9].*";       ## zum testen - https://regex101.com/
+  $hash->{Match}      = "[x][s][1][D][e][v][_][A][k][t][o][r]_[0-6][0-9].*|[x][s][1][D][e][v][_][S][e][n][s][o][r]_[0-6][0-9].*";       ## zum testen - https://regex101.com/
   $hash->{DefFn}      = "xs1Dev_Define";
-  $hash->{AttrFn}   =   "xs1Dev_Attr";
-  $hash->{ParseFn}    =   "xs1Dev_Parse";
+  $hash->{AttrFn}     = "xs1Dev_Attr";
+  $hash->{ParseFn}    = "xs1Dev_Parse";
   $hash->{SetFn}      = "xs1Dev_Set";
   $hash->{UndefFn}    = "xs1Dev_Undef";
   $hash->{AttrList}   = "debug:0,1 ".
                         "IODev ".
+                        "ignore:0,1 ".
                         "useSetExtensions:0,1 ".
                         $readingFnAttributes;
 
@@ -41,9 +42,6 @@ sub xs1Dev_Initialize {
 
 ########################
 sub xs1Dev_Define {
-  # $def --> Definition des Module
-  # $hash --> ARRAY des Module
-
   my ($hash, $def) = @_;
   my @arg = split("[ \t][ \t]*", $def);
 
@@ -100,7 +98,6 @@ sub xs1Dev_Define {
 
   $hash->{STATE}      = "Defined";          ## Der Status des Modules nach Initialisierung.
   $hash->{TIME}     = time();               ## Zeitstempel, derzeit vom anlegen des Moduls
-  #$hash->{VERSION}   = "1.17";             ## Version
 
   $hash->{xs1_name}   = "undefined";        ## Aktor | Sensor Name welcher def. im xs1
   $hash->{xs1_typ}    = "undefined";        ## xs1_Typ switch | hygrometer | temperature ...
@@ -111,9 +108,6 @@ sub xs1Dev_Define {
     $hash->{xs1_function3}  = "undefined";  ## xs1_Funktion zugeordnete Funktion 3
     $hash->{xs1_function4}  = "undefined";  ## xs1_Funktion zugeordnete Funktion 4
   }
-
-  # Attribut gesetzt
-  $attr{$name}{room}      = "xs1" if( not defined( $attr{$name}{room} ) );
 
   AssignIoPort($hash,$iodev) if( !$hash->{IODev} );   ## sucht nach einem passenden IO-Gerät (physikalische Definition)
 

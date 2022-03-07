@@ -7,7 +7,6 @@
 # - Port Check ???
 # - Sendeausgabe im LOG anpassen
 #
-#
 #################################################################
 
 package main;
@@ -22,9 +21,9 @@ my $missingModul    = "";
 my $xs1_ConnectionTry   = 1;  # disable Funktion sobald 10x keine Verbindung (Schutzabschaltung)
 my $xs1_id;
 
-eval "use Encode qw(encode encode_utf8 decode_utf8);1" or $missingModul .= "Encode ";
-eval "use JSON;1" or $missingModul .= "JSON ";
-eval "use Net::Ping;1" or $missingModul .= "Net::Ping ";
+eval {use Encode qw(encode encode_utf8 decode_utf8)} or $missingModul .= "Encode ";
+eval {use JSON} or $missingModul .= "JSON ";
+eval {use Net::Ping} or $missingModul .= "Net::Ping ";
 
 #$| = 1;    #Puffern abschalten, Hilfreich für PEARL WARNINGS Search
 
@@ -43,8 +42,8 @@ sub xs1Bridge_Initialize {
   $hash->{AttrList} = "debug:0,1,2 ".
                       "ignore:0,1 ".
                       "update_only_difference:0,1 ".
-                      "view_Device_name:0,1 ".
                       "view_Device_function:0,1 ".
+                      "view_Device_name:0,1 ".
                       "xs1_blackl_aktor ".
                       "xs1_blackl_sensor ".
                       "xs1_control:0,1 ".
@@ -124,8 +123,9 @@ sub xs1Bridge_Attr {
   my $typ = $hash->{TYPE};
   my $debug = AttrVal($hash->{NAME},"debug",0);
   my $xs1_interval = 0;
+  my @string_attrValue;
 
-  my @string_attrValue = split(",",$attrValue) if (defined $attrValue); ## for Check Blacklist
+  @string_attrValue = split(",",$attrValue) if (defined $attrValue);    ## for Check Blacklist
   my $length = scalar @string_attrValue;                                ## for Check Blacklist
 
   # $cmd  - Vorgangsart - kann die Werte "del" (löschen) oder "set" (setzen) annehmen
@@ -596,6 +596,8 @@ sub xs1Bridge_Write {           ## Zustellen von Daten via IOWrite() vom logisch
   $Aktor_ID = substr($Aktor_ID, 1,2);
 
   my $xs1cmd;
+  my $valuenew;
+
   #### xs1 Typ switch || shutter || timerswitch - Anpassung Sendebefehl
   if ($xs1_typ eq "switch" || $xs1_typ eq "shutter" || $xs1_typ eq "timerswitch") {
     $xs1cmd = "http://$xs1_ip/control?callback=cname&cmd=set_state_actuator&number=$Aktor_ID&$cmd2";
@@ -604,7 +606,7 @@ sub xs1Bridge_Write {           ## Zustellen von Daten via IOWrite() vom logisch
       $cmd = 0;
     }
     $xs1cmd = "http://$xs1_ip/control?callback=cname&cmd=set_state_actuator&number=$Aktor_ID&$cmd2" if ($cmd2 =~ /[f][u][n][c][t][i][o][n][=]./);
-    my $valuenew = substr($cmd2,3,length($cmd2)-3) if ($cmd2 !~ /[f][u][n][c][t][i][o][n][=]./);
+    $valuenew = substr($cmd2,3,length($cmd2)-3) if ($cmd2 !~ /[f][u][n][c][t][i][o][n][=]./);
     #Log3 $name, 3, "$typ: Write | Check cmd=$cmd cmd2=$cmd2 valuenew=$valuenew";
     $xs1cmd = "http://$xs1_ip/control?callback=cname&cmd=set_state_actuator&number=$Aktor_ID&value=$valuenew" if ($cmd2 !~ /[f][u][n][c][t][i][o][n][=]./);
   } else {
@@ -664,9 +666,13 @@ sub is_in_array {
   my ( $hash,$xs1_id,$i) = @_;
   my $name = $hash->{NAME};
   my $typ = $hash->{TYPE};
+  my $xs1_blackl;
 
-  my $xs1_blackl = AttrVal($hash->{NAME},"xs1_blackl_aktor",0) if ($i eq 0);
-  $xs1_blackl = AttrVal($hash->{NAME},"xs1_blackl_sensor",0) if ($i eq 1);
+  if ($i eq 0) {
+   $xs1_blackl = AttrVal($hash->{NAME},"xs1_blackl_aktor",0);
+  } elsif ($i eq 1) {
+    $xs1_blackl = AttrVal($hash->{NAME},"xs1_blackl_sensor",0);
+  }
 
   my @attr_array=split(/,/,$xs1_blackl);
   if ( grep( /^$xs1_id$/, @attr_array ) ) {
