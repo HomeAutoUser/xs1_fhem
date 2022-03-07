@@ -21,9 +21,9 @@ my $missingModul    = "";
 my $xs1_ConnectionTry   = 1;  # disable Funktion sobald 10x keine Verbindung (Schutzabschaltung)
 my $xs1_id;
 
-eval {use Encode qw(encode encode_utf8 decode_utf8)} or $missingModul .= "Encode ";
-eval {use JSON} or $missingModul .= "JSON ";
-eval {use Net::Ping} or $missingModul .= "Net::Ping ";
+eval {use Encode qw(encode encode_utf8 decode_utf8);1} or $missingModul .= "Encode ";
+eval {use JSON;1} or $missingModul .= "JSON ";
+eval {use Net::Ping;1} or $missingModul .= "Net::Ping ";
 
 #$| = 1;    #Puffern abschalten, Hilfreich für PEARL WARNINGS Search
 
@@ -95,7 +95,6 @@ sub xs1Bridge_Define {
 
   # Attribut gesetzt
   $attr{$name}{xs1_interval}  = "60"  if( not defined( $attr{$name}{xs1_interval} ) );
-  $attr{$name}{room}      = "xs1" if( not defined( $attr{$name}{room} ) );
   $attr{$name}{xs1_control} = "0" if( not defined( $attr{$name}{xs1_control} ) );
 
   $modules{xs1Bridge}{defptr}{BRIDGE} = $hash;
