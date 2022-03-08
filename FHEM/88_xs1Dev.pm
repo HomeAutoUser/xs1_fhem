@@ -1,5 +1,5 @@
 #################################################################
-# $Id: 88_xs1Dev.pm 0 2022-03-07 13:48:07Z HomeAuto_User $
+# $Id: 88_xs1Dev.pm 0 2022-03-08 13:48:07Z HomeAuto_User $
 #################################################################
 # logisches Modul - einzelnes Gerät, über das mit physikalisches
 #         Modul kommuniziert werden kann
@@ -17,26 +17,27 @@ use strict;
 use warnings;       # Warnings
 use POSIX;
 use Time::Local;
-#use SetExtensions;
 
 
 ########################
 sub xs1Dev_Initialize {
   my ($hash) = @_;
 
-  $hash->{Match}    = "[x][s][1][D][e][v][#][A][k][t][o][r]#[0-6][0-9].*|[x][s][1][D][e][v][#][S][e][n][s][o][r]#[0-6][0-9].*";       ## zum testen - https://regex101.com/
-  $hash->{DefFn}    = "xs1Dev_Define";
-  $hash->{AttrFn}   = "xs1Dev_Attr";
-  $hash->{ParseFn}  = "xs1Dev_Parse";
-  $hash->{SetFn}    = "xs1Dev_Set";
-  $hash->{UndefFn}  = "xs1Dev_Undef";
-  $hash->{AttrList} = "debug:0,1 ".
-                      "IODev ".
-                      "ignore:0,1 ".
-                      "useSetExtensions:0,1 ".
+  $hash->{Match}    = '[x][s][1][D][e][v][#][A][k][t][o][r]#[0-6][0-9].*|[x][s][1][D][e][v][#][S][e][n][s][o][r]#[0-6][0-9].*';       ## zum testen - https://regex101.com/
+  $hash->{DefFn}    = 'xs1Dev_Define';
+  $hash->{AttrFn}   = 'xs1Dev_Attr';
+  $hash->{ParseFn}  = 'xs1Dev_Parse';
+  $hash->{SetFn}    = 'xs1Dev_Set';
+  $hash->{UndefFn}  = 'xs1Dev_Undef';
+  $hash->{AttrList} = 'debug:0,1 '.
+                      'IODev '.
+                      'ignore:0,1 '.
+                      'useSetExtensions:0,1 '.
                       $readingFnAttributes;
 
-  $hash->{AutoCreate} = { "xs1Dev_Sensor_.*" => { GPLOT => "temp4hum4:Temp/Hum,", FILTER=>"%NAME",  } };
+  $hash->{AutoCreate} = { 'xs1Dev_Sensor_.*' => { GPLOT => 'temp4hum4:Temp/Hum,', FILTER=>'%NAME',  } };
+
+  return;
 }
 
 
@@ -46,9 +47,9 @@ sub xs1Dev_Define {
   my @arg = split("[ \t][ \t]*", $def);
 
               #-----0------1------2----3----4
-  return "Usage: define <NAME> xs1Dev <Typ> <ID>  |  wrong number of arguments" if( @arg != 4);
-  return "Usage: define <NAME> xs1Dev <Typ> <ID>  |  wrong ID, must be 1-64" if ( $arg[3] <1 || $arg[3] >64);
-  return "Usage: define <NAME> xs1Dev <Typ> <ID>  |  wrong Typ, must be A or S" if ( $arg[2] ne "A" && $arg[2] ne "S");
+  return 'Usage: define <NAME> xs1Dev <Typ> <ID>  |  wrong number of arguments' if( @arg != 4);
+  return 'Usage: define <NAME> xs1Dev <Typ> <ID>  |  wrong ID, must be 1-64' if ( $arg[3] <1 || $arg[3] >64);
+  return 'Usage: define <NAME> xs1Dev <Typ> <ID>  |  wrong Typ, must be A or S' if ( $arg[2] ne 'A' && $arg[2] ne 'S');
 
   splice( @arg, 1, 1 );
   my $iodev;
@@ -93,20 +94,20 @@ sub xs1Dev_Define {
   $hash->{ID} = $xs1_typ1.$xs1_ID;                      ## A02 || S05
   $modules{xs1Dev}{defptr}{$xs1_typ1.$xs1_ID} = $hash;  ## !!! Adresse rückwärts dem Hash zuordnen (für ParseFn)
 
-  my $debug = AttrVal($hash->{NAME},"debug",0);
-  AttrVal($hash->{NAME},"useSetExtensions",0);
+  my $debug = AttrVal($hash->{NAME},'debug',0);
+  AttrVal($hash->{NAME},'useSetExtensions',0);
 
-  $hash->{STATE}  = "Defined";              ## Der Status des Modules nach Initialisierung.
+  $hash->{STATE}  = 'Defined';              ## Der Status des Modules nach Initialisierung.
   $hash->{TIME}   = time();                 ## Zeitstempel, derzeit vom anlegen des Moduls
 
-  $hash->{xs1_name} = "undefined";          ## Aktor | Sensor Name welcher def. im xs1
-  $hash->{xs1_typ}  = "undefined";          ## xs1_Typ switch | hygrometer | temperature ...
+  $hash->{xs1_name} = 'undefined';          ## Aktor | Sensor Name welcher def. im xs1
+  $hash->{xs1_typ}  = 'undefined';          ## xs1_Typ switch | hygrometer | temperature ...
 
-  if ($xs1_typ1 eq "A"){
-    $hash->{xs1_function1}  = "undefined";  ## xs1_Funktion zugeordnete Funktion 1
-    $hash->{xs1_function2}  = "undefined";  ## xs1_Funktion zugeordnete Funktion 2
-    $hash->{xs1_function3}  = "undefined";  ## xs1_Funktion zugeordnete Funktion 3
-    $hash->{xs1_function4}  = "undefined";  ## xs1_Funktion zugeordnete Funktion 4
+  if ($xs1_typ1 eq 'A'){
+    $hash->{xs1_function1}  = 'undefined';  ## xs1_Funktion zugeordnete Funktion 1
+    $hash->{xs1_function2}  = 'undefined';  ## xs1_Funktion zugeordnete Funktion 2
+    $hash->{xs1_function3}  = 'undefined';  ## xs1_Funktion zugeordnete Funktion 3
+    $hash->{xs1_function4}  = 'undefined';  ## xs1_Funktion zugeordnete Funktion 4
   }
 
   AssignIoPort($hash,$iodev) if( !$hash->{IODev} );   ## sucht nach einem passenden IO-Gerät (physikalische Definition)
@@ -129,7 +130,7 @@ sub xs1Dev_Attr {
   my ($cmd,$name,$attrName,$attrValue) = @_;
   my $hash = $defs{$name};
   my $typ = $hash->{TYPE};
-  my $debug = AttrVal($hash->{NAME},"debug",0);
+  my $debug = AttrVal($hash->{NAME},'debug',0);
 
   #### Handling bei set ... attribute
   if ($cmd eq 'set' && $init_done == 1 ) {
@@ -137,7 +138,7 @@ sub xs1Dev_Attr {
   }
 
   #### Handling bei del ... attribute
-  if ($cmd eq "del") {
+  if ($cmd eq 'del') {
     Log3 $name, 3, "$name: $cmd attribute $attrName";
   }
 
@@ -152,106 +153,106 @@ sub xs1Dev_Set {
   my $typ = $hash->{TYPE};      ## xs1Dev
   my $cmd = $args[0];
 
-  my $debug = AttrVal($hash->{NAME},"debug",0);
+  my $debug = AttrVal($hash->{NAME},'debug',0);
   my $xs1_typ = $hash->{xs1_typ};
   my $Aktor_ID = substr($xs1_ID,1,2); ## A01 zu 01
   my $cmd2;                           ## notwendig für Switch Funktionsplatz xs1
   my $cmdFound;
 
-  return "no set value specified" if(int(@args) < 1);
+  return 'no set value specified' if(int(@args) < 1);
   my %setList = ();       ## Funktionen als Liste
   my %setListPos = ();    ## Funktionen als Position|Funktion
   my %xs1_function = ();  ## Funktionen in ARRAY schreiben
 
-  Debug " -------------- ERROR CHECK - START --------------" if($debug && $cmd ne "?");
+  Debug ' -------------- ERROR CHECK - START --------------' if($debug && $cmd ne '?');
   # http://192.168.2.5/control?callback=cname&cmd=set_state_actuator&number=7&function=1
 
-  if (substr($xs1_ID,0,1) eq "A" && $xs1_typ ne "undefined") {                    ## nur bei Aktoren und nicht "undefined"
+  if (substr($xs1_ID,0,1) eq 'A' && $xs1_typ ne 'undefined') {                    ## nur bei Aktoren und nicht 'undefined'
     for (my $d = 0; $d < 4; $d++) {
-      if ($hash->{"xs1_function".($d+1)} ne "-") {
-        if ($hash->{"xs1_function".($d+1)} eq "dim_up") {                         ## FHEM Mod xs1 dim_up -> FHEM dimup
-          $xs1_function{"dimup:noArg"} = ($d+1);
-        } elsif ($hash->{"xs1_function".($d+1)} eq "dim_down") {                  ## FHEM Mod xs1 dim_down -> FHEM dimdown
-          $xs1_function{"dimdown:noArg"} = ($d+1);
-        } elsif (exists $xs1_function{$hash->{"xs1_function".($d+1)}.":noArg"}){  ## CHECK ob Funktion bereits exists
-          $xs1_function{$hash->{"xs1_function".($d+1)}."_".($d+1).":noArg"} = ($d+1);
+      if ($hash->{'xs1_function'.($d+1)} ne '-') {
+        if ($hash->{'xs1_function'.($d+1)} eq 'dim_up') {                         ## FHEM Mod xs1 dim_up -> FHEM dimup
+          $xs1_function{'dimup:noArg'} = ($d+1);
+        } elsif ($hash->{'xs1_function'.($d+1)} eq 'dim_down') {                  ## FHEM Mod xs1 dim_down -> FHEM dimdown
+          $xs1_function{'dimdown:noArg'} = ($d+1);
+        } elsif (exists $xs1_function{$hash->{'xs1_function'.($d+1)}.':noArg'}){  ## CHECK ob Funktion bereits exists
+          $xs1_function{$hash->{'xs1_function'.($d+1)}.'_'.($d+1).':noArg'} = ($d+1);
         } else {
-          $xs1_function{$hash->{"xs1_function".($d+1)}.":noArg"} = ($d+1);        ## xs1 Standardbezeichnung Funktion
+          $xs1_function{$hash->{'xs1_function'.($d+1)}.':noArg'} = ($d+1);        ## xs1 Standardbezeichnung Funktion
         }
       }
     }
 
-    if ($xs1_typ eq "dimmer"){  #bei dimmer Typ, dim hinzufügen FHEM
-      $xs1_function{"dim"} = (5);
+    if ($xs1_typ eq 'dimmer'){  #bei dimmer Typ, dim hinzufügen FHEM
+      $xs1_function{'dim'} = (5);
     }
 
     while ( (my $k,my $v) = each %xs1_function ) {
       if ($v > 0 && $v < 7) {
-        $setListPos{$v."|".$k} = $k;
+        $setListPos{$v.'|'.$k} = $k;
         #Debug " $name: Set | $k|$v" if($debug && $cmd ne "?");
       }
     }
 
-    my $setList = join(" ", keys %xs1_function);
-    my $setListAll = join(" ", keys %setListPos);
+    my $setList = join(' ', keys %xs1_function);
+    my $setListAll = join(' ', keys %setListPos);
 
-    my $cmdFound = index($setListAll, $cmd.":");  ## check cmd in setListAll - Zuordnung Platz
-    my $cmdFound2 = "";
+    my $cmdFound = index($setListAll, $cmd.':');  ## check cmd in setListAll - Zuordnung Platz
+    my $cmdFound2 = '';
 
     if ($cmdFound >= 0) {                         #$cmd für Sendebefehl anpassen
       $cmdFound2 = substr($setListAll,$cmdFound-2,1);
-      $cmd2 = "function=".$cmdFound2;
+      $cmd2 = 'function='.$cmdFound2;
     } else {
       $cmd2 = $cmd.$args[1] if (defined $args[1]);
     }
 
     ### dimmer - spezifisch dim hinzufügen FHEM + value Check
-    if ($xs1_typ eq "dimmer" && $cmd eq "dim") {
+    if ($xs1_typ eq 'dimmer' && $cmd eq 'dim') {
       if (not defined $args[1]) {
-        return "dim value arguments failed";
+        return 'dim value arguments failed';
       } elsif ($args[1] !~ /[a-zA-Z]/ && $args[1] <= 1 || $args[1] !~ /[a-zA-Z]/ && $args[1] >= 99) {
-        return "dim value must be 1 to 99";
+        return 'dim value must be 1 to 99';
       } elsif ($args[1] =~ /[a-zA-Z]/) {
-        return "wrong dim value format! only value from 1 to 99";
+        return 'wrong dim value format! only value from 1 to 99';
       } else { 
-        $cmd = $cmd.$args[1]."%";   ## FHEM state mod --> anstatt nur dim --> dim47%
+        $cmd = $cmd.$args[1].'%';   ## FHEM state mod --> anstatt nur dim --> dim47%
       }
     }
 
-    Debug " $name: Set | xs1_typ=$xs1_typ cmd=$cmd setListAll=$setListAll cmdFound=$cmdFound cmdFound2=$cmdFound2" if($debug && $cmd ne "?");
+    Debug " $name: Set | xs1_typ=$xs1_typ cmd=$cmd setListAll=$setListAll cmdFound=$cmdFound cmdFound2=$cmdFound2" if($debug && $cmd ne '?');
 
-    if(AttrVal($name,"useSetExtensions",undef) || AttrVal($name,"useSetExtensions","0")) {
+    if(AttrVal($name,'useSetExtensions',undef) || AttrVal($name,'useSetExtensions',0)) {
         $cmd =~ s/([.?*])/\\$1/g;
         if ($setList !~ m/\b$cmd\b/) {
-          Debug " $name: Set | useSetExtensions check" if($debug && $cmd ne "?");
+          Debug " $name: Set | useSetExtensions check" if($debug && $cmd ne '?');
           unshift @args, $name;
           return SetExtensions($hash, $setList, $name, @args);
         }
         SetExtensionsCancel($hash);
       } else {
-        return "Unknown argument ?, choose one of $setList" if($args[0] eq "?");
+        return "Unknown argument ?, choose one of $setList" if($args[0] eq '?');
       }
 
     #Debug " $name: Set | xs1_typ=$xs1_typ (after mod) cmd=$cmd" if($debug && $cmd ne "?");
 
     if (defined($hash->{IODev}->{NAME})) {
-      if ($xs1_typ eq "switch" || $xs1_typ eq "dimmer" || $xs1_typ eq "shutter" || $xs1_typ eq "timerswitch" && $cmd ne "?") {
-        Debug " $name: Set IOWrite | xs1_ID=$xs1_ID xs1_typ=$xs1_typ cmd=$cmd cmd2=$cmd2" if($debug && $xs1_typ ne "temperature" && $xs1_typ ne "hygrometer");
+      if ($xs1_typ eq 'switch' || $xs1_typ eq 'dimmer' || $xs1_typ eq 'shutter' || $xs1_typ eq 'timerswitch' && $cmd ne '?') {
+        Debug " $name: Set IOWrite | xs1_ID=$xs1_ID xs1_typ=$xs1_typ cmd=$cmd cmd2=$cmd2" if($debug && $xs1_typ ne 'temperature' && $xs1_typ ne 'hygrometer');
         #Log3 $name, 3, "$name: Set IOWrite | xs1_ID=$xs1_ID xs1_typ=$xs1_typ cmd=$cmd cmd2=$cmd2 IODev=$hash->{IODev}->{NAME}";
         Log3 $name, 3, "$typ set $name $cmd";
         
         IOWrite($hash, $xs1_ID, $xs1_typ, $cmd, $cmd2);
-        readingsSingleUpdate($hash, "state", $cmd , 1);     
+        readingsSingleUpdate($hash, 'state', $cmd , 1);
       }
       #else {
       #Log3 $name, 2, "$name: Device NOT SUPPORTED for Dispatch. In xs1 disabled.";
       #}
     } else {
-      return "no IODev define. Please define xs1Bridge.";
+      return 'no IODev define. Please define xs1Bridge.';
     }
 
     #Debug " $name: Set | xs1_ID=$xs1_ID xs1_typ=$xs1_typ" if($debug);
-    Debug " -------------- ERROR CHECK - END --------------" if($debug);
+    Debug ' -------------- ERROR CHECK - END --------------' if($debug);
   }
 
   return;
@@ -262,7 +263,7 @@ sub xs1Dev_Set {
 sub xs1Dev_Parse {              ## Input Data from 88_xs1Bridge
   my ( $io_hash, $data) = @_;   ## $io_hash = ezControl -> def. Name von xs1Bridge
 
-  my ($xs1Dev,$xs1_readingsname,$xs1_ID,$xs1_typ2,$xs1_value,$xs1_f1,$xs1_f2,$xs1_f3,$xs1_f4,$xs1_name) = split("#", $data);
+  my ($xs1Dev,$xs1_readingsname,$xs1_ID,$xs1_typ2,$xs1_value,$xs1_f1,$xs1_f2,$xs1_f3,$xs1_f4,$xs1_name) = split('#', $data);
   my $xs1_typ1 = substr($xs1_readingsname,0,1);   ## A || S
 
   my $def = $modules{xs1Dev}{defptr}{$xs1_typ1.$xs1_ID};
@@ -275,22 +276,21 @@ sub xs1Dev_Parse {              ## Input Data from 88_xs1Bridge
 
   my $name = $hash->{NAME};     ## xs1Dev_Aktor_01
   my $typ = $hash->{TYPE};      ## xs1Dev
-  $typ = "xs1Dev" if (!$def);   ## Erstanlegung
+  $typ = 'xs1Dev' if (!$def);   ## Erstanlegung
 
   ###### Define and values update ######
   #Log3 $typ, 3, "$typ: Parse | Data: $xs1Dev | $xs1_readingsname | $xs1_ID | $xs1_typ2 | $xs1_value | $xs1_typ1" if (!$def);
   #Log3 $typ, 3, "$typ: Parse | Data: $xs1Dev | $xs1_readingsname | $xs1_ID | $xs1_typ2 | $xs1_value | $xs1_typ1";
 
   if(!$def) {
-      # "UNDEFINED xs1Dev_Aktor_12 xs1Dev A 12"
-      Log3 $name, 3, "$typ: Unknown device ".$xs1Dev."_".$xs1_readingsname."_"."$xs1_ID $xs1_ID $xs1_typ1 , please define it";
-      return "UNDEFINED xs1Dev"."_".$xs1_readingsname."_"."$xs1_ID xs1Dev $xs1_typ1 $xs1_ID";
+      Log3 $name, 3, "$typ: Unknown device ".$xs1Dev.'_'.$xs1_readingsname.'_'."$xs1_ID $xs1_ID $xs1_typ1 , please define it";
+      return 'UNDEFINED xs1Dev'.'_'.$xs1_readingsname.'_'."$xs1_ID xs1Dev $xs1_typ1 $xs1_ID";   ## "UNDEFINED xs1Dev_Aktor_12 xs1Dev A 12"
   } else {
-    #Log3 $name, 3, "$typ: device $xs1_readingsname"."_"."$xs1_ID xs1_value:$xs1_value xs1_typ2:$xs1_typ2";
+    #Log3 $name, 3, "$typ: device $xs1_readingsname".'_'."$xs1_ID xs1_value:$xs1_value xs1_typ2:$xs1_typ2";
 
     AssignIoPort($hash, $io_hash);        ## sucht nach einem passenden IO-Gerät (physikalische Definition)
 
-    if ($xs1_readingsname eq "Aktor") {   ## zugeordnete xs1_Funktionen
+    if ($xs1_readingsname eq 'Aktor') {   ## zugeordnete xs1_Funktionen
       $hash->{xs1_function1} = $xs1_f1;
       $hash->{xs1_function2} = $xs1_f2;
       $hash->{xs1_function3} = $xs1_f3;
@@ -300,33 +300,33 @@ sub xs1Dev_Parse {              ## Input Data from 88_xs1Bridge
     readingsBeginUpdate($hash);
 
     #### Typ switch  | on | off mod for FHEM Default
-    if ($xs1_typ2 eq "switch") {
-      if ($xs1_value == 0) { $xs1_value = "off"; }
-        elsif ($xs1_value == 100) { $xs1_value = "on"; }
-      readingsBulkUpdate($hash, "state", $xs1_value);  # Aktor | Sensor Update value
+    if ($xs1_typ2 eq 'switch') {
+      if ($xs1_value == 0) { $xs1_value = 'off'; }
+        elsif ($xs1_value == 100) { $xs1_value = 'on'; }
+      readingsBulkUpdate($hash, 'state', $xs1_value);  # Aktor | Sensor Update value
 
       ## RegEx devStateIcon da Symbole nicht gleich benannt -> dim_up | dim_down
-      if ($hash->{xs1_function1} eq "dim_up" || $hash->{xs1_function2} eq "dim_up" || $hash->{xs1_function3} eq "dim_up" || $hash->{xs1_function4} eq "dim_up" || 
-        $hash->{xs1_function1} eq "dim_down" || $hash->{xs1_function2} eq "dim_down" || $hash->{xs1_function3} eq "dim_down" || $hash->{xs1_function4} eq "dim_down" ) {
-        $attr{$name}{devStateIcon} = "dim_up:dimup dim_down:dimdown" if( not defined( $attr{$name}{devStateIcon} ) );
+      if ($hash->{xs1_function1} eq 'dim_up' || $hash->{xs1_function2} eq 'dim_up' || $hash->{xs1_function3} eq 'dim_up' || $hash->{xs1_function4} eq 'dim_up' || 
+        $hash->{xs1_function1} eq 'dim_down' || $hash->{xs1_function2} eq 'dim_down' || $hash->{xs1_function3} eq 'dim_down' || $hash->{xs1_function4} eq 'dim_down' ) {
+        $attr{$name}{devStateIcon} = 'dim_up:dimup dim_down:dimdown' if( not defined( $attr{$name}{devStateIcon} ) );
       }
 
     #### Typ temperature
-    } elsif ($xs1_typ2 eq "temperature") {
-      my $xs1_value_new = "T: ".$xs1_value; ## temperature mod for FHEM Default
+    } elsif ($xs1_typ2 eq 'temperature') {
+      my $xs1_value_new = 'T: '.$xs1_value; ## temperature mod for FHEM Default
 
-      readingsBulkUpdate($hash, "state", $xs1_value_new);
-      readingsBulkUpdate($hash, "temperature", $xs1_value);
+      readingsBulkUpdate($hash, 'state', $xs1_value_new);
+      readingsBulkUpdate($hash, 'temperature', $xs1_value);
 
     #### Typ hygrometer
-    } elsif ($xs1_typ2 eq "hygrometer") {
-      my $xs1_value_new = "H: ".$xs1_value; ## hygrometer mod for FHEM Default
+    } elsif ($xs1_typ2 eq 'hygrometer') {
+      my $xs1_value_new = 'H: '.$xs1_value; ## hygrometer mod for FHEM Default
 
-      readingsBulkUpdate($hash, "state", $xs1_value_new);
-      readingsBulkUpdate($hash, "humidity", $xs1_value);
+      readingsBulkUpdate($hash, 'state', $xs1_value_new);
+      readingsBulkUpdate($hash, 'humidity', $xs1_value);
 
     #### Typ dimmer
-    } elsif ($xs1_typ2 eq "dimmer") {
+    } elsif ($xs1_typ2 eq 'dimmer') {
       ## RegEx devStateIcon da Symbole nicht durchweg von 0 - 100 | dim_up | dim_down
       $attr{$name}{devStateIcon} =  "dim0[1-6]\\D%:dim06% dim[7-9]\\D|dim[1][0-2]%:dim12% dim[1][3-8]%:dim18% \n"
                                     ."dim[1][9]|dim[2][0-5]%:dim25% dim[2][6-9]|dim[3][0-1]%:dim31% dim[3][2-7]%:dim37% \n"
@@ -335,70 +335,70 @@ sub xs1Dev_Parse {              ## Input Data from 88_xs1Bridge
                                     ."dim[7][6-9]|dim[8][0-1]%:dim81% dim[8][2-7]%:dim87% dim[8][8-9]|dim[9][0-3]%:dim93% \n"
                                     ."dim[9][4-9]|dim[1][0][0]%:dim100% dim[_][u][p]:dimup dim[_][d][o]:dimdown" if( not defined( $attr{$name}{devStateIcon} ) );
 
-      if ($xs1_value ne "0.0") {
-      $xs1_value = "dim".sprintf("%02d", $xs1_value)."%";
-      } elsif ($xs1_value eq "0.0") {
-      $xs1_value = "off";
+      if ($xs1_value ne '0.0') {
+      $xs1_value = 'dim'.sprintf("%02d", $xs1_value).'%';
+      } elsif ($xs1_value eq '0.0') {
+      $xs1_value = 'off';
       }
 
-      readingsBulkUpdate($hash, "state", $xs1_value);
+      readingsBulkUpdate($hash, 'state', $xs1_value);
 
     #### Typ shutter | on | off mod for FHEM Default
-    } elsif ($xs1_typ2 eq "shutter") {
-      if ($xs1_value == 0) { $xs1_value = "off"; }
-        elsif ($xs1_value == 100) { $xs1_value = "on"; }
-      readingsBulkUpdate($hash, "state", $xs1_value);
+    } elsif ($xs1_typ2 eq 'shutter') {
+      if ($xs1_value == 0) { $xs1_value = 'off'; }
+        elsif ($xs1_value == 100) { $xs1_value = 'on'; }
+      readingsBulkUpdate($hash, 'state', $xs1_value);
 
     #### Typ timerswitch | on | off mod for FHEM Default
-    } elsif ($xs1_typ2 eq "timerswitch") {
-      if ($xs1_value == 0) { $xs1_value = "off"; }
-        elsif ($xs1_value == 100) { $xs1_value = "on"; }
-      readingsBulkUpdate($hash, "state", $xs1_value);
+    } elsif ($xs1_typ2 eq 'timerswitch') {
+      if ($xs1_value == 0) { $xs1_value = 'off'; }
+        elsif ($xs1_value == 100) { $xs1_value = 'on'; }
+      readingsBulkUpdate($hash, 'state', $xs1_value);
 
-    } elsif ($xs1_typ2 eq "barometer") {
-      readingsBulkUpdate($hash, "pressure", $xs1_value);
-      readingsBulkUpdate($hash, "state", "P: ".$xs1_value);
+    } elsif ($xs1_typ2 eq 'barometer') {
+      readingsBulkUpdate($hash, 'pressure', $xs1_value);
+      readingsBulkUpdate($hash, 'state', 'P: '.$xs1_value);
 
-    } elsif ($xs1_typ2 eq "rain") {
-      readingsBulkUpdate($hash, "rain", $xs1_value);
-      readingsBulkUpdate($hash, "state", "R: ".$xs1_value);
+    } elsif ($xs1_typ2 eq 'rain') {
+      readingsBulkUpdate($hash, 'rain', $xs1_value);
+      readingsBulkUpdate($hash, 'state', 'R: '.$xs1_value);
 
-    } elsif ($xs1_typ2 eq "rain_1h") {
-      readingsBulkUpdate($hash, "rain_calc_h", $xs1_value);
-      readingsBulkUpdate($hash, "state", "R: ".$xs1_value);
+    } elsif ($xs1_typ2 eq 'rain_1h') {
+      readingsBulkUpdate($hash, 'rain_calc_h', $xs1_value);
+      readingsBulkUpdate($hash, 'state', 'R: '.$xs1_value);
 
-    } elsif ($xs1_typ2 eq "rain_24h") {
-      readingsBulkUpdate($hash, "rain_calc_d", $xs1_value);
-      readingsBulkUpdate($hash, "state", "R: ".$xs1_value);
+    } elsif ($xs1_typ2 eq 'rain_24h') {
+      readingsBulkUpdate($hash, 'rain_calc_d', $xs1_value);
+      readingsBulkUpdate($hash, 'state', 'R: '.$xs1_value);
 
-    } elsif ($xs1_typ2 eq "winddirection") {
-      readingsBulkUpdate($hash, "Winddirection", $xs1_value);
-      readingsBulkUpdate($hash, "state", "D: ".$xs1_value);
+    } elsif ($xs1_typ2 eq 'winddirection') {
+      readingsBulkUpdate($hash, 'Winddirection', $xs1_value);
+      readingsBulkUpdate($hash, 'state', 'D: '.$xs1_value);
 
-    } elsif ($xs1_typ2 eq "windspeed") {
-      readingsBulkUpdate($hash, "Windspeed", $xs1_value);
-      readingsBulkUpdate($hash, "state", "W: ".$xs1_value);
+    } elsif ($xs1_typ2 eq 'windspeed') {
+      readingsBulkUpdate($hash, 'Windspeed', $xs1_value);
+      readingsBulkUpdate($hash, 'state', 'W: '.$xs1_value);
 
-    } elsif ($xs1_typ2 eq "counter" || $xs1_typ2 eq "counterdiff" || $xs1_typ2 eq "fencedetector" || $xs1_typ2 eq "gas_consump" || $xs1_typ2 eq "gas_peak" || 
-      $xs1_typ2 eq "light" || $xs1_typ2 eq "motion" || $xs1_typ2 eq "other" || $xs1_typ2 eq "rainintensity" || $xs1_typ2 eq "remotecontrol" || 
-      $xs1_typ2 eq "uv_index" || $xs1_typ2 eq "waterdetector" || $xs1_typ2 eq "waterlevel" || $xs1_typ2 eq "windgust" || $xs1_typ2 eq "windvariance" || 
-      $xs1_typ2 eq "wtr_consump" || $xs1_typ2 eq "wtr_peak") {
-        readingsBulkUpdate($hash, "state", $xs1_value);
+    } elsif ($xs1_typ2 eq 'counter' || $xs1_typ2 eq 'counterdiff' || $xs1_typ2 eq 'fencedetector' || $xs1_typ2 eq 'gas_consump' || $xs1_typ2 eq 'gas_peak' || 
+      $xs1_typ2 eq 'light' || $xs1_typ2 eq 'motion' || $xs1_typ2 eq 'other' || $xs1_typ2 eq 'rainintensity' || $xs1_typ2 eq 'remotecontrol' || 
+      $xs1_typ2 eq 'uv_index' || $xs1_typ2 eq 'waterdetector' || $xs1_typ2 eq 'waterlevel' || $xs1_typ2 eq 'windgust' || $xs1_typ2 eq 'windvariance' || 
+      $xs1_typ2 eq 'wtr_consump' || $xs1_typ2 eq 'wtr_peak') {
+        readingsBulkUpdate($hash, 'state', $xs1_value);
 
      ### Fenstermelder = windowopen | Tuermelder = dooropen --> 0 zu / 100 offen | mod for FHEM Default
-    } elsif ($xs1_typ2 eq "dooropen" || $xs1_typ2 eq "windowopen") {
-      if ($xs1_value == 0.0) { $xs1_value = "closed";} elsif ($xs1_value == 100.0) { $xs1_value = "Open"; }
+    } elsif ($xs1_typ2 eq 'dooropen' || $xs1_typ2 eq 'windowopen') {
+      if ($xs1_value == 0.0) { $xs1_value = 'closed';} elsif ($xs1_value == 100.0) { $xs1_value = 'Open'; }
 
-      if ($xs1_typ2 eq "windowopen") { readingsBulkUpdate($hash, "Window", $xs1_value); }
-      if ($xs1_typ2 eq "dooropen") { readingsBulkUpdate($hash, "Door", $xs1_value); }
+      if ($xs1_typ2 eq 'windowopen') { readingsBulkUpdate($hash, 'Window', $xs1_value); }
+      if ($xs1_typ2 eq 'dooropen') { readingsBulkUpdate($hash, 'Door', $xs1_value); }
 
       my $value = Value($name);
       my $OldValue = OldValue($name);
-      if ($value ne $OldValue) { readingsBulkUpdate($hash, "Previous", $xs1_value ,0); }
-      readingsBulkUpdate($hash, "state", $xs1_value);
+      if ($value ne $OldValue) { readingsBulkUpdate($hash, 'Previous', $xs1_value ,0); }
+      readingsBulkUpdate($hash, 'state', $xs1_value);
       ### alles andere ...
     } else {
-      readingsBulkUpdate($hash, "state", $xs1_value);
+      readingsBulkUpdate($hash, 'state', $xs1_value);
     }
 
     readingsEndUpdate($hash, 1);
