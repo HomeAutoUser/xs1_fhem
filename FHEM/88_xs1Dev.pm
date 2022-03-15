@@ -21,7 +21,7 @@ use Time::Local;
 
 ########################
 sub xs1Dev_Initialize {
-  my ($hash) = @_;
+  my $hash          = shift // return;
 
   $hash->{Match}    = '[x][s][1][D][e][v][#][A][k][t][o][r]#[0-6][0-9].*|[x][s][1][D][e][v][#][S][e][n][s][o][r]#[0-6][0-9].*';       ## zum testen - https://regex101.com/
   $hash->{DefFn}    = 'xs1Dev_Define';
@@ -43,7 +43,8 @@ sub xs1Dev_Initialize {
 
 ########################
 sub xs1Dev_Define {
-  my ($hash, $def) = @_;
+  my $hash = shift // return;
+  my $def = shift // return;
   my @arg = split("[ \t][ \t]*", $def);
 
               #-----0------1------2----3----4
@@ -127,7 +128,11 @@ sub xs1Dev_Define {
 
 ########################
 sub xs1Dev_Attr {
-  my ($cmd,$name,$attrName,$attrValue) = @_;
+  my $cmd       = shift;
+  my $name      = shift;
+  my $attrName  = shift;
+  my $attrValue = shift;
+
   my $hash = $defs{$name};
   my $typ = $hash->{TYPE};
   my $debug = AttrVal($hash->{NAME},'debug',0);
@@ -410,7 +415,9 @@ sub xs1Dev_Parse {              ## Input Data from 88_xs1Bridge
 
 ########################
 sub xs1Dev_Undef {
-  my ( $hash, $name) = @_;
+  my $hash = shift // return;
+  my $name = shift // return;
+
   my $typ = $hash->{TYPE};
 
   delete($modules{xs1Dev}{defptr}{$hash->{ID}});
