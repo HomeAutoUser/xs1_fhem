@@ -1,5 +1,5 @@
 #################################################################
-# $Id: 88_xs1Bridge.pm 0 2022-03-08 18:23:25Z HomeAuto_User $
+# $Id: 88_xs1Bridge.pm 0 2022-03-15 18:23:25Z HomeAuto_User $
 #################################################################
 # physisches Modul - Verbindung zur Hardware
 #
@@ -12,13 +12,13 @@
 package main;
 
 # Laden evtl. abhängiger Perl- bzw. FHEM-Module
-use HttpUtils;                # um Daten via HTTP auszutauschen https://wiki.fhem.de/wiki/HttpUtils
 use strict;
 use warnings;                 # Warnings
+use HttpUtils;                # um Daten via HTTP auszutauschen https://wiki.fhem.de/wiki/HttpUtils
 use Net::Ping;
 
 my $missingModul      = '';
-my $xs1_ConnectionTry = 1;  # disable Funktion sobald 10x keine Verbindung (Schutzabschaltung)
+my $xs1_ConnectionTry = 1;    # disable Funktion sobald 10x keine Verbindung (Schutzabschaltung)
 my $xs1_id;
 
 eval {use Encode qw(encode encode_utf8 decode_utf8);1} or $missingModul .= 'Encode ';
@@ -30,7 +30,7 @@ eval {use Net::Ping;1} or $missingModul .= 'Net::Ping ';
 
 ##########################
 sub xs1Bridge_Initialize {
-  my ($hash) = @_;
+  my $hash            = shift // return;
 
   $hash->{WriteFn}    = 'xs1Bridge_Write';
   $hash->{Clients}    = ':xs1Dev:';
@@ -60,14 +60,15 @@ sub xs1Bridge_Initialize {
 
 ##########################
 sub xs1Bridge_Define {
-  my ($hash, $def) = @_;
+  my $hash = shift // return;
+  my $def = shift // return;
   my @arg = split("[ \t][ \t]*", $def);
-  my $name = $hash->{NAME};             ## Der Definitionsname, mit dem das Gerät angelegt wurde.
-  my $typ = $hash->{TYPE};              ## Der Modulname, mit welchem die Definition angelegt wurde.
+  my $name = $hash->{NAME};
+  my $typ = $hash->{TYPE};
   my $debug = AttrVal($hash->{NAME},'debug',0);
-  my $viewDeviceName = AttrVal($hash->{NAME},'view_Device_name',0);
-  my $viewDeviceFunction = AttrVal($hash->{NAME},'view_Device_function',0);
   my $update_only_difference = AttrVal($hash->{NAME},'update_only_difference',0);
+  my $viewDeviceFunction = AttrVal($hash->{NAME},'view_Device_function',0);
+  my $viewDeviceName = AttrVal($hash->{NAME},'view_Device_name',0);
 
                 #   0     1      2
   return "Usage: define <NAME> $name <IP>"  if(@arg != 3);
@@ -93,7 +94,7 @@ sub xs1Bridge_Define {
   $hash->{BRIDGE}   = 1;
   $hash->{STATE}    = 'Initialized';  ## Der Status des Modules nach Initialisierung.
   $hash->{TIME}     = time();         ## Zeitstempel, derzeit vom anlegen des Moduls
-  $hash->{VERSION}  = '1.27';         ## Version
+  $hash->{VERSION}  = '1.28';         ## Version
 
   # Attribut gesetzt
   if( not defined( $attr{$name}{xs1_control} ) ) { $attr{$name}{xs1_control}   = '0'; }
@@ -118,7 +119,11 @@ sub xs1Bridge_Define {
 
 ##########################
 sub xs1Bridge_Attr {
-  my ($cmd,$name,$attrName,$attrValue) = @_;
+  my $cmd       = shift;
+  my $name      = shift;
+  my $attrName  = shift;
+  my $attrValue = shift;
+
   my $hash = $defs{$name};
   my $typ = $hash->{TYPE};
   my $debug = AttrVal($hash->{NAME},'debug',0);
@@ -249,11 +254,11 @@ sub xs1Bridge_Attr {
 
 ##########################
 sub xs1Bridge_GetUpDate {
-  my ($hash) = @_;
-  my $name = $hash->{NAME};
-  my $typ = $hash->{TYPE};
-  my $state = $hash->{STATE};
-  my $xs1_ip = $hash->{xs1_ip};
+  my $hash    = shift // return;
+  my $name    = $hash->{NAME};
+  my $typ     = $hash->{TYPE};
+  my $state   = $hash->{STATE};
+  my $xs1_ip  = $hash->{xs1_ip};
 
   my $def;
   my $xs1_uptimeNew   = $hash->{helper}{xs1_uptimeNew};
@@ -568,10 +573,10 @@ sub xs1Bridge_GetUpDate {
 ##########################
 sub xs1Bridge_Write {           ## Zustellen von Daten via IOWrite() vom logischen zum physischen Modul
   my ($hash, $Aktor_ID, $xs1_typ, $cmd, $cmd2) = @_;
-  my $name = $hash->{NAME};
-  my $typ = $hash->{TYPE};
-  my $xs1_ip = $hash->{xs1_ip};
-  my $debug = AttrVal($hash->{NAME},'debug',0);
+  my $name    = $hash->{NAME};
+  my $typ     = $hash->{TYPE};
+  my $xs1_ip  = $hash->{xs1_ip};
+  my $debug   = AttrVal($hash->{NAME},'debug',0);
 
   ## Anfrage (Client -> XS1): http://192.168.1.242/control?callback=cname&cmd=set_state_actuator&number=1&value=100
 
@@ -641,7 +646,8 @@ sub xs1Bridge_Write {           ## Zustellen von Daten via IOWrite() vom logisch
 
 ##########################
 sub xs1Bridge_Undef {
-  my ( $hash, $name) = @_;
+  my $hash = shift // return;
+  my $name = shift // return;
   my $typ = $hash->{TYPE};
 
   RemoveInternalTimer($hash);
@@ -664,7 +670,9 @@ sub xs1Bridge_Undef {
 # eigene Sub
 
 sub is_in_array {
-  my ($hash,$xs1_id,$i) = @_;
+  my $hash    = shift // return;  #return if no hash is provided
+  my $xs1_id  = shift // return;  #return if no xs1_id is provided
+  my $i       = shift // return;  #return if no i is provided
   my $name = $hash->{NAME};
   my $typ = $hash->{TYPE};
   my $xs1_blackl;
